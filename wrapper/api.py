@@ -9,7 +9,7 @@ from queue import PriorityQueue
 class Api(object):
 
 	#Authentification dans une classe !
-	BEARER_TOKEN = "BEARER_TOKEN"
+	BEARER_TOKEN = "AAAAAAAAAAAAAAAAAAAAADAyLgEAAAAAc4eGilNnzVuxnuvfEZjxh%2BU7P74%3D4GbSIUdOdwOLnZ8ClQU8dtEGy6nz8ijBZs0sxZioTCskVyxNjY"
 	
 	# Base url for twitter api  V2.0
 	# We will concatenate useful endpoints for the requests to it

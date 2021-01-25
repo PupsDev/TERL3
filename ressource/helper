@@ -41,8 +41,9 @@
 	 
 
  ############################################################################
+pip install responses ?
 
- Pour lancer les tests :
+ Pour lancer une classe de test :
  se mettre dans le rep du git 
 
  -- git repertoire -> -- wrapper
@@ -50,3 +51,7 @@
 
 faire (sans le .py à la fin ):
 python -m tests.test_ma_classe
+
+ Pour lancer les test :
+
+python -m unittest
