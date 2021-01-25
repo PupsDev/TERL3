@@ -1,0 +1,43 @@
+	# query :
+	# "exact match"
+	# OR 
+	# - for removing a term
+	# #
+	# from:account
+	# list:
+	# filter: 
+	# etc.. https://developer.twitter.com/en/docs/twitter-api/v1/tweets/search/guides/standard-operators
+
+		#list of all user.fields
+	ALL_USER_FIELDS = "created_at, description, entities,\
+				 id, location, name,pinned_tweet_id, profile_image_url,\
+				 protected,public_metrics, url, username, verified,withheld"
+
+	#list of all tweet.fields
+	ALL_TWEET_FIELDS ="attachments, author_id, context_annotations, conversation_id,\
+					 created_at, entities, geo, id, in_reply_to_user_id, lang, non_public_metrics,\
+					 public_metrics, organic_metrics, promoted_metrics, possibly_sensitive, referenced_tweets,\
+					 reply_settings, source, text, withheld"
+
+	Endpoint				Requests per 15-minute window
+				 				Per app	Per user
+	Tweet lookup 				300		900
+	Recent search *				450		180
+	Timelines
+	- User Tweet Timelines      1500	900
+	- User mention timeline		450		180
+
+	Filtered stream * 				50
+	- Connecting
+
+	- Adding/deleting filters		450
+
+	- Listing filters				450
+
+						 
+	Sampled stream
+
+									50
+	 
+
+ 
