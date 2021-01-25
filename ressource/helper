@@ -40,4 +40,13 @@
 									50
 	 
 
- 
+ ############################################################################
+
+ Pour lancer les tests :
+ se mettre dans le rep du git 
+
+ -- git repertoire -> -- wrapper
+ 				   -- tests
+
+faire (sans le .py à la fin ):
+python -m tests.test_ma_classe
