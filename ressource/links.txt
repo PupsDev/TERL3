@@ -1,0 +1,5 @@
+Wrapper for twitter v1 : https://github.com/bear/python-twitter
+example api v2 : https://github.com/twitterdev/Twitter-API-v2-sample-code
+twitter v2 doc : https://developer.twitter.com/en/docs/twitter-api/early-access
+
+list of api wrapper : https://github.com/realpython/list-of-python-api-wrappers
