@@ -39,8 +39,44 @@
 
 									50
 	 
+    "data": [                                                                        
+        {                                                                            
+            "id": "1278747501642657792",                                             
+            "text": "It's been a year since Twitter's Developer Labs launched.\n\nAs 
+we build towards the next generation of the #TwitterAPI (coming VERY soon), see what 
+we've learned and changed along the way. https://t.co/WvjuEWCa6G"                    
+        }                                                                            
+    ],                                                                               
+    "errors": [                                                                      
+        {                                                                            
+            "detail": "Could not find tweet with ids: [255542774432063488].",        
+            "parameter": "ids",                                                      
+            "resource_type": "tweet",                                                
+            "title": "Not Found Error",                                              
+            "type": "https://api.twitter.com/2/problems/resource-not-found",         
+            "value": "255542774432063488"                                            
+        }                                                                            
+    ]                                                                                
+} 
+{'cache-control': 'no-cache, no-store, max-age=0',
+ 'content-disposition': 'attachment; filename=json.json', 
+ 'content-encoding': 'gzip', 'content-length': '372',
+  'content-type': 'application/json; charset=utf-8',
+   'date': 'Mon, 25 Jan 2021 21:41:41 GMT',
+    'server': 'tsa_f',
+     'set-cookie': 'personalization_id="v1_OJ+FkwDSiBuP8xodMpD89A=="; Max-Age=63072000; Expires=Wed, 25 Jan 2023 21:41:41 GMT; Path=/; Domain=.twitter.com; Secure; SameSite=None, guest_id=v1%3A161161090175708830; Max-Age=63072000; Expires=Wed, 25 Jan 2023 21:41:41 GMT; Path=/; Domain=.twitter.com; Secure; SameSite=None', 'strict-transport-security': 'max-age=631138519',
+      'x-access-level': 'read',
+       'x-connection-hash': '57d9b9cafa6a4f31900d682870186709', 
+       'x-content-type-options': 'nosniff',
+        'x-frame-options': 'SAMEORIGIN',
+         'x-rate-limit-limit': '300',
+          'x-rate-limit-remaining': '287',
+           'x-rate-limit-reset': '1611611109', 
+           'x-response-time': '143', 'x-xss-protection': '0'}       
 
- ############################################################################
+raise TwitterError({'message': 'Media could not be uploaded.'})
+
+############################################################################
 pip install responses ?
 
  Pour lancer une classe de test :
@@ -55,3 +91,7 @@ python -m tests.test_ma_classe
  Pour lancer les test :
 
 python -m unittest
+
+#########################################################################
+Questions :
+ - Utiliser des modèles (object) à la place du json ?
