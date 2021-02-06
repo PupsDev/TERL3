@@ -77,6 +77,10 @@ we've learned and changed along the way. https://t.co/WvjuEWCa6G"
 raise TwitterError({'message': 'Media could not be uploaded.'})
 
 ############################################################################
+libraries
+
+pip install --upgrade requests-cache
+############################################################################
 pip install responses ?
 
  Pour lancer une classe de test :
@@ -92,6 +96,52 @@ python -m tests.test_ma_classe
 
 python -m unittest
 
+
 #########################################################################
 Questions :
- - Utiliser des modèles (object) à la place du json ?
+ - Utiliser des modèles (object) à la place du json ? non
+
+ #########################################################################
+ 
+ Did:
+ - streams
+ - cache ?
+ - parse
+ - pagination
+ - get_remaining_calls dicts 
+
+ To do :
+
+1/
+
+ - errors in data json
+ - test filtered ?
+ - unit tests
+ 
+ 2/
+ - scrap tweets 
+ - generate tweets
+
+ 2/ bis GeoName
+
+ ########################################################
+
+
+ split -b 53750k <your-file>
+
+cat xa* > <your-file>
+
+ data set of tweets :
+ archive tweet 
+ worst month of 2019 for natural disaster : https://insurancenews.com.au/international/september-worst-month-for-natural-disasters 
+ september
+
+ https://archive.org/search.php?query=collection%3Atwitterstream&sort=-publicdate&and[]=year%3A%222019%22
+
+https://github.com/shaypal5/awesome-twitter-data#tweet-datasets-labelled
+
+ cite : https://crisisnlp.qcri.org/covid19
+
+https://www.researchgate.net/post/Where-can-I-find-a-large-dataset-of-tweets
+
+ https://faker.readthedocs.io/en/master/

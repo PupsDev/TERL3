@@ -3,6 +3,7 @@
 import os
 import json
 import requests
+import requests_cache
 import time
 
 from wrapper.file_cache import _FileCache
@@ -12,8 +13,9 @@ from wrapper.exceptions import (
     AuthentificationError)
 
 from wrapper.rate_limit import RateLimit
+from wrapper.parser import Parser
 
-DEFAULT_CACHE = object()
+requests_cache.install_cache('wrapper_cache')
 
 class Api(object):
     """ Wrapper class for twitter api V2.0
@@ -26,9 +28,9 @@ class Api(object):
         list of methods:
 
         >>> api.get_recent_search(query,fields)
-        >>> api.get_tweet(ids , fields)
-        >>> api.get_filtered_stream(query,fields)
-        >>> api.get_sample_stream(query,fields)
+        >>> api.get_tweet(ids,fields)
+        >>> api.get_filtered_stream(fields)
+        >>> api.get_sample_stream(fields)
 
         The results are cached by default for 10mn
 
@@ -41,23 +43,20 @@ class Api(object):
     # A singleton representing a lazily instantiated FileCache.
     # We delay the creation of the cache object before it's useful so we save memory if we don't need it
 
-    DEFAULT_CACHE_TIMEOUT = 600
-
-
-    _cache = {}
-
-    def __init__(self,bearer_token=None,cache=DEFAULT_CACHE):
+    def __init__(self,bearer_token=None, parse = False):
         """Instantiates a wrapper.Api object"""
-        self._set_cache(cache)
-        self.rate_limit = RateLimit()
 
+        self.rate_limit = RateLimit()
+        self._parse = parse
+        if parse:
+            self._parser = Parser()
 
         if bearer_token:
             self.headers = self._create_headers(bearer_token)
         else:
             raise AuthentificationError("The wrapper.Api instance must be authenticated.")
 
-    def get_recent_search(query , fields):
+    def get_recent_search(self,query , fields, max_pages=0):
         """Get recent search 
         Args:
             query:
@@ -67,10 +66,33 @@ class Api(object):
                 fields of the tweet we want to retrieve
                 example :tweet.fields="lang,author_id"
         Returns:
-            A JSON object from the _request function
+            A generator
         """
         url = self.BASE_URL+ "tweets/search/recent?query={}&{}".format(query, fields)
-        return self._request(url,"recent_search")
+
+        response = self._request(url,"recent_search")
+
+        i=0
+        # -> needs review maybe different if parse or not parse 
+        # otherwise yield only the first page
+
+        if max_pages and self._parse:
+            list_tweets = {}
+            list_tweets['tweets'] = response['tweets']
+            meta = response['meta']
+            print("Fetching {} pages ..".format(max_pages))
+
+            while 'next_token' in meta and i < max_pages:
+                url = self.BASE_URL+ "tweets/search/recent?query={}&{}&next_token={}".format(query, fields,response['meta']['next_token'])
+                response = self._request(url,"recent_search")
+                meta = response['meta']
+                list_tweets['tweets'].extend(response['tweets'])
+                i+=1
+                yield response['tweets']
+
+
+        else :
+            yield response
 
     def get_tweet(self,ids , fields=""):
         """Get a specific tweet or a list of specific tweets by their ids
@@ -85,8 +107,6 @@ class Api(object):
                 A JSON object from the _request function
         """
 
-        #TO DO unique id or lists ids here only list of ids
-
         if isinstance(ids, list): 
             string_id = ','.join(map(str, ids))
             url = self.BASE_URL + "tweets?ids={}&{}".format(string_id, fields)
@@ -97,14 +117,29 @@ class Api(object):
 
         return self._request(url,"tweet")
 
-    #To implement
-    def get_filtered_stream():
+
+    def get_filtered_stream(self, fields=""):
         """ Get a filtered stream by the query"""
-        return
-    #To implement
-    def get_sample_stream():
+
+        url = self.BASE_URL+ "tweets/search/stream?{}".format(fields)
+        return self._request(url,"filtered_stream")
+
+    def get_sample_stream(self, fields=""):
         """ Get a sample stream representing the trends in the sample"""
-        return
+
+        url = self.BASE_URL+ "tweets/sample/stream?{}".format(fields)
+        return self._request(url,"sample_stream")
+    def get_stream_rules(self, ids):
+        """ Get the list of the rules active for the filtered stream"""
+
+        url = self.BASE_URL+ "tweets/search/stream/rules?ids={}".format(ids)
+        return self._request(url,"rules")
+
+    def post_stream_rules(self, rules):
+        """ Get the list of the rules active for the filtered stream"""
+
+        url = self.BASE_URL+ "tweets/search/stream/rules"
+        return self._request(url,"post_rules", rules) 
 
     def _create_headers(self,bearer_token):
         """ create the header of the request from the bearer token returns a header"""
@@ -112,7 +147,7 @@ class Api(object):
         headers = {"Authorization": "Bearer {}".format(bearer_token)}
         return headers
 
-    def _connect_to_endpoint(self,url, headers,endpoint):
+    def _connect_to_endpoint(self,url, headers,endpoint, rules=""):
         """ Connect to the endpoint and check for error
         Args:
             url:
@@ -125,8 +160,17 @@ class Api(object):
         Returns:
             A JSON object
         """
-        response = requests.request("GET", url, headers=self.headers)
-        #print(response.status_code)
+        if "post" in endpoint:
+            payload = {"add": rules}
+            response = requests.request("POST", url, headers=self.headers,  json=payload)
+
+        elif "stream" in endpoint:
+            with requests_cache.disabled():
+                response = requests.request("GET", url, headers=self.headers, stream=True)
+
+        else:
+            response = requests.request("GET", url, headers=self.headers)
+            
         self.rate_limit.set_limit(response.headers["x-rate-limit-remaining"],
                                             response.headers["x-rate-limit-reset"], endpoint)
         if response.status_code != 200:
@@ -139,7 +183,7 @@ class Api(object):
             
         return response
 
-    def _request(self, url, endpoint):
+    def _request(self, url, endpoint, rules=""):
         """ Request function using cache
         Args:
             url:
@@ -149,37 +193,27 @@ class Api(object):
         Returns:
             A JSON object
         """
-
-        # Basic cache checking
-        #to do cache
-        #if url in self.cache:
-        #   return self.cache[url]       
-
         # We check if we have at least one call remaining for the endpoint
         remaining = int(self.rate_limit.get_limit(endpoint).remaining)
-        if remaining > 0 :
+        if remaining > 0:
             try:
                 response = self._connect_to_endpoint(url, self.headers,endpoint)
                
             except Exception as err:
                 print(err)
                 return
-        else :
+        else:
             time_sleep = (float(self.rate_limit.get_limit(endpoint).reset)-time.time())+ 1
             print("Too many request for "+endpoint+" endpoint, waiting "+str(int(time_sleep)) + " second(s)...")
             time.sleep(time_sleep)
         
-        return response.json()
-    def _set_cache(self, cache):
-        """Override the default cache.  Set to None to prevent caching.
-        Args:
-            cache:
-                An instance that supports the same API as the twitter._FileCache
-        """
-        if cache == DEFAULT_CACHE:
-            self._cache = _FileCache()
+
+        if (self._parse):
+            tweet = self._parser.parse(response)
+            return tweet
         else:
-            self._cache = cache
+            return response.json()
+
 
     #Utilitary functions
     def get_remaining_calls(self):

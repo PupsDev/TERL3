@@ -10,14 +10,18 @@ class RateLimit(object):
 		self._rate_limit = {}
 		self._rate_limit["recent_search"] = EndpointRateLimit(180,180,0)
 		self._rate_limit["tweet"] = EndpointRateLimit(300,300,0)
+		self._rate_limit["sample_stream"] = EndpointRateLimit(50,50,0)
+		self._rate_limit["search_stream"] = EndpointRateLimit(50,50,0)
+		self._rate_limit["rules"] = EndpointRateLimit(450,450,0)
+		self._rate_limit["post_rules"] = EndpointRateLimit(450,450,0)
+		
 	def get_remaining_calls(self):
 		""" get remaining calls of the api as a dict"""
 
-		return {"recent_search" : self._rate_limit["recent_search"].remaining,
-				 "tweet" : self._rate_limit["tweet"].remaining}
-
+		return self._rate_limit
 	def get_limit(self, endpoint):
 		""" get limit of the endpoint as a named tuple"""
+		
 		return self._rate_limit[endpoint]
 
 
@@ -25,7 +29,7 @@ class RateLimit(object):
 		""" Set the remaining and reset of the endpoint
 			Create a new endpoint with default limit and update remaining and reset
 		"""
-		updated_endpoint = EndpointRateLimit(self._rate_limit[endpoint],remaining,reset)
+		updated_endpoint = EndpointRateLimit(self._rate_limit[endpoint].limit,int(remaining),int(reset))
 		self._rate_limit.update({endpoint: updated_endpoint})
 
 		return self.get_limit(endpoint)
