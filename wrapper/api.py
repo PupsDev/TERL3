@@ -6,7 +6,6 @@ import requests
 import requests_cache
 import time
 
-from wrapper.file_cache import _FileCache
 from wrapper.exceptions import (
     TwitterError,
     RequestError,
@@ -106,16 +105,18 @@ class Api(object):
         Returns:
                 A JSON object from the _request function
         """
-
+        # NOT AN INT FOR IDS
         if isinstance(ids, list): 
             string_id = ','.join(map(str, ids))
-            url = self.BASE_URL + "tweets?ids={}&{}".format(string_id, fields)
-        elif isinstance(ids, int):
-            url = self.BASE_URL + "tweets/{}&{}".format(str(ids), fields)
+            url = self.BASE_URL + "tweets?ids={}&{}".format(string_id,fields)
+        elif type(ids)== int:
+            url = self.BASE_URL + "tweets/{}?&{}".format(str(ids),fields)
+
         else :
             raise ValueError("get_tweet function requires ids as a list of integers or a single integer.")
 
-        return self._request(url,"tweet")
+
+        return self._request(url,"tweet").json()
 
 
     def get_filtered_stream(self, fields=""):
@@ -160,6 +161,8 @@ class Api(object):
         Returns:
             A JSON object
         """
+
+
         if "post" in endpoint:
             payload = {"add": rules}
             response = requests.request("POST", url, headers=self.headers,  json=payload)
@@ -168,9 +171,10 @@ class Api(object):
             with requests_cache.disabled():
                 response = requests.request("GET", url, headers=self.headers, stream=True)
 
+
         else:
             response = requests.request("GET", url, headers=self.headers)
-            
+ 
         self.rate_limit.set_limit(response.headers["x-rate-limit-remaining"],
                                             response.headers["x-rate-limit-reset"], endpoint)
         if response.status_code != 200:
@@ -180,7 +184,7 @@ class Api(object):
                 
             )
 
-            
+       
         return response
 
     def _request(self, url, endpoint, rules=""):
@@ -194,25 +198,29 @@ class Api(object):
             A JSON object
         """
         # We check if we have at least one call remaining for the endpoint
+
+
         remaining = int(self.rate_limit.get_limit(endpoint).remaining)
         if remaining > 0:
             try:
                 response = self._connect_to_endpoint(url, self.headers,endpoint)
                
             except Exception as err:
-                print(err)
+                #print(err)
                 return
         else:
             time_sleep = (float(self.rate_limit.get_limit(endpoint).reset)-time.time())+ 1
             print("Too many request for "+endpoint+" endpoint, waiting "+str(int(time_sleep)) + " second(s)...")
             time.sleep(time_sleep)
+
+
         
 
         if (self._parse):
             tweet = self._parser.parse(response)
             return tweet
         else:
-            return response.json()
+            return response
 
 
     #Utilitary functions

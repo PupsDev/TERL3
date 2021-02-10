@@ -2,7 +2,7 @@ from wrapper import Api
 import json
 import os
 
-BEARER_TOKEN = "BEARER_TOKEN"
+BEARER_TOKEN = "AAAAAAAAAAAAAAAAAAAAADAyLgEAAAAAc4eGilNnzVuxnuvfEZjxh%2BU7P74%3D4GbSIUdOdwOLnZ8ClQU8dtEGy6nz8ijBZs0sxZioTCskVyxNjY"
 api = Api(BEARER_TOKEN, True)
 
 
