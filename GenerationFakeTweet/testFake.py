@@ -2,17 +2,18 @@
 import json
 import random
 import csv
+import sys
 import linecache
 from faker import Faker
 
 
-#INIT Faker / Rand
+# INIT Faker / Rand
 random.seed(random.randint(0,999))
 Faker.seed(random.randint(0,999))
 fake = Faker()
 
 
-#Random ID
+# Random ID
 def rand_ID():
 	id = 0
 	for i in range(19):
@@ -21,7 +22,7 @@ def rand_ID():
 	return str(id)
 
 
-#Random Localisation
+# Random Localisation
 def rand_geo():
 	file = open("US.tsv")
 	num_lines = sum(1 for line in file)
@@ -33,17 +34,17 @@ def rand_geo():
 	return tab_geo
 
 
-#Func map space
+# Func map space
 def map_space(n):
 	return " " + n
 
 
-#Random Text
+# Random Text
 def rand_text_longlat():
 	geo = rand_geo()
 	coords = []
-	coords.append(geo[4])
-	coords.append(geo[5])
+	coords.append(geo[9])
+	coords.append(geo[10])
 
 	connecteur = ["at", "near to", "on", "placed at", "situated at", "in", "appearing in", "next to", "close to", "around", "located in"]
 	hashtag = ["Avalanche","Cataclysm","Catastrophe","Cyclones","Earthquakes","Eruption","Extreme Precipitation","Flood","Flooding","Floodwater","Hailstorm","Hurricanes","Landfall","Landslides","Lava","Mudslide","Seismic Wave","Snowstorm","Storm","Tidal Wave","Tornado","Tropical Cyclone","Tropical Storm","Tsunamis","Twitster","Typhoon","Volcanic ","Volcanic Eruptions","Volcanoes","Wildfires","Wind Wave"]
@@ -60,16 +61,16 @@ def rand_text_longlat():
 	return [text, geo[2], coords]
 
 
-#Valid tweet
 ##
+##
+## Valid tweet
 ##
 ##
 
 
-#Tweet to JSON
+# Tweet to JSON
 def fake_tweet_creation():
 	infos = rand_text_longlat()
-
 	tweet_data = {
 		"author_id": rand_ID(),
 		"geo": infos[2],
@@ -80,13 +81,24 @@ def fake_tweet_creation():
 		"text": infos[0],
 		"valid": "?"
 	}
+	return tweet_data;
 
-	json_obj = json.dumps(tweet_data, indent = 4)
-	with open("fakeTweet.json","a+") as outfile:
-		outfile.write(json_obj)
+# Main
+def main():
+	if(len(sys.argv) != 2):
+		print("Passez en argument le nombre de FakeTweet à générer")
+	else:
+		x = int(sys.argv[1])
+		if(x < 0):
+			print("Passez en argument un nombre positif")
+		else:
+			tweet_list = []
+			for i in range(x):
+				tweet_list.append(fake_tweet_creation())
 
+			json_obj = json.dumps(tweet_list, indent = 4)
+			with open("fakeTweet.json","w") as outfile:
+				outfile.write(json_obj)
 
-
-#MAIN()
-for i in range(10):
-	fake_tweet_creation()
+if __name__ == "__main__":
+    main()
