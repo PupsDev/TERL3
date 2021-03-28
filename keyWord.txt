@@ -29,3 +29,4 @@ Extreme Precipitation
 Wildfires
 Landslides
 Tsunamis
+Rise in temperature

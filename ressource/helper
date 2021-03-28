@@ -158,4 +158,7 @@ https://www.researchgate.net/post/Where-can-I-find-a-large-dataset-of-tweets
  - Chaque méthode de test va tester une méthode de la classe et retourner les mêmes données que le json correspond à son nom dans le dossier testdata
  - > faciliter écriture des résultats dans un fichier
  -> écrire les tests en même temps que le code
- 
+ ########################################################
+ git add -A
+ git commit -m ""
+ git push origin main

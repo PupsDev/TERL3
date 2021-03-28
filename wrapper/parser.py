@@ -1,4 +1,6 @@
 import json
+import spacy
+import os
 
 class Parser(object):
 	""" Parser class for twitter api V2.0
@@ -35,6 +37,12 @@ class Parser(object):
 		""" Parse the tweet into a proper json format with added information 
 			Takes a tweet as Json dict and return the parsed tweet as json
 		"""
+
+		f = open("keyWord.txt", "r")
+		tag_remove = "[Fake tweet for training data]"
+		ndlists =  [nd.lower().replace('\n', '') for nd in f]
+
+		
 		dict_tweets = {}
 		list_tweets = []
 
@@ -55,11 +63,15 @@ class Parser(object):
 								parsed_tweet['place'][annotation['normalized_text']] = annotation['probability']
 				
 			else:
+
 				if 'place_id' in tweet['geo']:
 					# If there is a place_id it should have a includes->places
-					for place in tweets_json['includes']['places']:
-						if tweet['geo']['place_id'] == place['id']:
-							parsed_tweet['place_user'] = place['full_name']
+					if 'includes' in tweets_json:
+	
+						print(json.dumps(tweets_json,sort_keys=True, indent=4))
+						for place in tweets_json['includes']['places']:
+							if tweet['geo']['place_id'] == place['id']:
+								parsed_tweet['place_user'] = place['full_name']
 				if 'coordinates' not in tweet['geo']:
 					parsed_tweet['geo'] = "NULL"
 				else :
@@ -71,10 +83,15 @@ class Parser(object):
 			# Place is empty so -> NULL
 			if not parsed_tweet['place']:
 				parsed_tweet['place'] = "NULL"
+			
+			tweet['text'] = tweet['text'].replace(tag_remove, '')
+			tweet['text'] = tweet['text'].replace('#', '')
+
 			parsed_tweet['text'] = tweet['text']
 			parsed_tweet['id'] = tweet['id']
 			parsed_tweet['author_id'] = tweet['author_id']
 			
+			parsed_tweet = self.nlp(parsed_tweet,ndlists)
 			list_tweets.append(parsed_tweet)
 			dict_tweets['tweets'] = list_tweets
 
@@ -82,3 +99,43 @@ class Parser(object):
 				dict_tweets['meta'] = tweets_json['meta']
 
 		return dict_tweets
+	def nlp(self, tweet, ndlists):
+		""" Uses spacy to tokenize, tag, parse and NER tweet
+			add "spacy" : {dictionary}
+				-> "noun"
+				-> "event"
+				-> "candidate"
+			}
+		"""
+
+		nlp = spacy.load("en_core_web_sm")
+
+		# Process whole text of the tweet
+		text = tweet['text']
+		doc = nlp(text)
+
+		events = []
+		nouns = []
+		candidates = []
+
+
+		# Analyze syntax
+		nouns =  [chunk.text for chunk in doc.noun_chunks]
+
+		# Compare natural disaster as event against the list
+
+		for noun in nouns:
+			for no in noun.split():
+				if no.lower() in ndlists:
+					events.append(no.capitalize())
+
+		# Find named entities, phrases and concepts
+		for entity in doc.ents:
+			if entity.label_ == "GPE":
+				candidates.append(entity.text)
+		tweet['text'] = text
+		tweet["spacy"] = {}
+		tweet["spacy"]["nouns"] = nouns
+		tweet["spacy"]["events"] = events
+		tweet["spacy"]["candidates"] = candidates
+		return tweet

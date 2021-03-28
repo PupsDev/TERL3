@@ -5,6 +5,7 @@ import json
 import requests
 import requests_cache
 import time
+import urllib.parse
 
 from wrapper.exceptions import (
     TwitterError,
@@ -67,31 +68,36 @@ class Api(object):
         Returns:
             A generator
         """
-        url = self.BASE_URL+ "tweets/search/recent?query={}&{}".format(query, fields)
+        url = self.BASE_URL+ "tweets/search/recent?query="+'"'+ urllib.parse.quote("[Fake tweet for training data]")+'"'+"{}&{}".format(query, fields)
 
+
+        #print(url)
         response = self._request(url,"recent_search")
 
         i=0
         # -> needs review maybe different if parse or not parse 
         # otherwise yield only the first page
+        #self.print(response)
+        return response
 
-        if max_pages and self._parse:
-            list_tweets = {}
-            list_tweets['tweets'] = response['tweets']
-            meta = response['meta']
-            print("Fetching {} pages ..".format(max_pages))
+        # if max_pages and self._parse:
+        #     list_tweets = {}
+        #     list_tweets['tweets'] = response['tweets']
+        #     meta = response['meta']
+        #     print("Fetching {} pages ..".format(max_pages))
 
-            while 'next_token' in meta and i < max_pages:
-                url = self.BASE_URL+ "tweets/search/recent?query={}&{}&next_token={}".format(query, fields,response['meta']['next_token'])
-                response = self._request(url,"recent_search")
-                meta = response['meta']
-                list_tweets['tweets'].extend(response['tweets'])
-                i+=1
-                yield response['tweets']
+        #     while 'next_token' in meta and i < max_pages:
+
+        #         url = self.BASE_URL+ "tweets/search/recent?query={}&{}&next_token={}".format(query, fields,response['meta']['next_token'])
+        #         response = self._request(url,"recent_search")
+        #         meta = response['meta']
+        #         list_tweets['tweets'].extend(response['tweets'])
+        #         i+=1
+        #         yield response['tweets']
 
 
-        else :
-            yield response
+        # else :
+        #     yield response
 
     def get_tweet(self,ids , fields=""):
         """Get a specific tweet or a list of specific tweets by their ids

@@ -5,7 +5,7 @@ import json
 import types
 
 DEFAULT_URL = "https://api.twitter.com/2/"
-BEARER_TOKEN = ""
+BEARER_TOKEN = "AAAAAAAAAAAAAAAAAAAAADAyLgEAAAAAc4eGilNnzVuxnuvfEZjxh%2BU7P74%3D4GbSIUdOdwOLnZ8ClQU8dtEGy6nz8ijBZs0sxZioTCskVyxNjY"
 
 ''' 
 	To do :
@@ -97,6 +97,8 @@ class ApiTest(unittest.TestCase):
 	@responses.activate
 	def test_get_sample_stream(self):
 		resp = self.api.get_sample_stream()
+		print("resp : ")
+		print(resp)
 		pass
 		
 	#Tests Get_filtered_stream

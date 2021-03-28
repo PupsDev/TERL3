@@ -2,60 +2,25 @@ from wrapper import Api
 import json
 import os
 
-BEARER_TOKEN = ""
-api = Api(BEARER_TOKEN)
+BEARER_TOKEN = "AAAAAAAAAAAAAAAAAAAAADAyLgEAAAAAc4eGilNnzVuxnuvfEZjxh%2BU7P74%3D4GbSIUdOdwOLnZ8ClQU8dtEGy6nz8ijBZs0sxZioTCskVyxNjY"
+api = Api(BEARER_TOKEN, True)
 ids=[1278747501642657792,1255542774432063488]
 
-tweet_fields = "tweet.fields=lang,author_id"
-max_results = 10
-max_pages = 0
-search = "%23twitter"
-query = search+"&max_results="+str(max_results)
+tweet_fields = "expansions=geo.place_id&tweet.fields=lang,author_id,geo,entities"
+max_results = 30
+max_pages = 20
 
 
-# json_response = api.get_tweet(ids,tweet_fields)
-
-# api.print(json_response['data'])
-# for r in json_response['data']:
-# 	for key,value in r.items():
-# 		print(value)
-
-# response = api.get_recent_search(query,tweet_fields,max_pages)
-
-# print("Get recent search : ")
-# tweets_list = []
-
-# # for tweets in response:
-# # 	api.print(tweets)
+search_list = ["Doublepups"]
 
 
-# path = os.getcwd()
-# path += '/testdata'
+for search in search_list :
+	query = "from:"+search+"&max_results="+str(max_results)
 
-# method = "get_recent_search"
-# test_result = method+".json"
+	response = api.get_recent_search(query,tweet_fields,max_pages)
 
-# with open(path+'/'+test_result, "w") as outfile:
-# 	for tweets in response:
-# 		json.dump(tweets, outfile)
+	print(search)
 
-json_response = api.get_sample_stream()
-print(json_response)
-
-# for response_line in json_response.iter_lines():
-# 	if response_line:
-# 		json_response = json.loads(response_line)
-# 		print(json.dumps(json_response, indent=4, sort_keys=True))
-
-# print("Get tweets : ")
-# print(json.dumps(json_response,sort_keys=True, indent=2))
-
-
-# json_response3 = api.get_sample_stream()
-# for i in range(1,3):
-	
-# for response_line in json_response3.iter_lines(3):
-# 	if response_line:
-# 		json_response = json.loads(response_line)
-# 		print(json.dumps(json_response, indent=4, sort_keys=True))
-
+	api.print(response)
+	with open(search+".json", "w", encoding='utf-8') as outfile:
+		json.dump(response, outfile)
