@@ -15,7 +15,7 @@ if sys.argc > 4:
 
 	db.select_database("disastweet")
 
- 	db.select_collection("spacetweets") #select or create a collection
+	db.select_collection("spacetweets") #select or create a collection
 
 	api = Api(sys.argv[2], True)
 	tweet_fields = "expansions=geo.place_id&tweet.fields=geo,entities,author_id"
@@ -27,4 +27,4 @@ if sys.argc > 4:
 	query = search+"&max_results="+str(max_results)
 	response = api.get_yielded_recent_search(query,tweet_fields,max_pages)
 	for tweets in response:
-		 db._insert("", tweets)
+		db._insert("", tweets)
