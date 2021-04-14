@@ -1,14 +1,19 @@
 from database import Database
+import os
+import json
 
-# with data
-db = Database("saisir l'uri ici. sans oublier de mettre le fichier TLS")
+db = Database("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
 
-# with json file
 db.select_database("disastweet")
 
-db.select_collection("test")
+ db.select_collection("spacetweets") #select or create a collection
 
-db._insert("testdata/get_tweets_with_fields.json")
+files = os.listdir("./spacetweets")
+for file in files:
+	rep = "./spacetweets/"+file
+	with open(rep) as json_data:
+	    data_dict = json.load(json_data)
+	    db._insert("", data_dict["tweets"])
 
 found = db.find_from_collection()
 
