@@ -9,7 +9,7 @@ class Parser(object):
 		used for this Project :
 
 			{
-			"data" : 
+			"data" :
 				[
 					"author_id": "author_id",
 					"id": "tweet_id",
@@ -34,7 +34,7 @@ class Parser(object):
 		""" Instantiates a Parser Object"""
 
 	def parse(self, tweets):
-		""" Parse the tweet into a proper json format with added information 
+		""" Parse the tweet into a proper json format with added information
 			Takes a tweet as Json dict and return the parsed tweet as json
 		"""
 
@@ -42,7 +42,7 @@ class Parser(object):
 		tag_remove = "[Fake tweet for training data]"
 		ndlists =  [nd.lower().replace('\n', '') for nd in f]
 
-		
+
 		dict_tweets = {}
 		list_tweets = []
 
@@ -51,7 +51,7 @@ class Parser(object):
 		for tweet in tweets_json['data']:
 			parsed_tweet = {}
 			parsed_tweet['place'] = {}
-			if 'geo' not in tweet : 
+			if 'geo' not in tweet :
 				parsed_tweet['geo'] = "NULL"
 				parsed_tweet['valid'] = "False"
 				parsed_tweet['place_user'] = "NULL"
@@ -61,13 +61,13 @@ class Parser(object):
 						for annotation in tweet['entities']['annotations']:
 							if 'Place' in annotation['type']:
 								parsed_tweet['place'][annotation['normalized_text']] = annotation['probability']
-				
+
 			else:
 
 				if 'place_id' in tweet['geo']:
 					# If there is a place_id it should have a includes->places
 					if 'includes' in tweets_json:
-	
+
 						print(json.dumps(tweets_json,sort_keys=True, indent=4))
 						for place in tweets_json['includes']['places']:
 							if tweet['geo']['place_id'] == place['id']:
@@ -77,20 +77,20 @@ class Parser(object):
 				else :
 					parsed_tweet['geo'] = tweet['geo']['coordinates']['coordinates']
 				parsed_tweet['valid'] = "True"
-				
+
 			# Tweet comes directly from the twitter API so always True
 			parsed_tweet['real'] = "True"
 			# Place is empty so -> NULL
 			if not parsed_tweet['place']:
 				parsed_tweet['place'] = "NULL"
-			
+
 			tweet['text'] = tweet['text'].replace(tag_remove, '')
 			tweet['text'] = tweet['text'].replace('#', '')
 
 			parsed_tweet['text'] = tweet['text']
 			parsed_tweet['id'] = tweet['id']
 			parsed_tweet['author_id'] = tweet['author_id']
-			
+
 			parsed_tweet = self.nlp(parsed_tweet,ndlists)
 			list_tweets.append(parsed_tweet)
 			dict_tweets['tweets'] = list_tweets
@@ -140,4 +140,19 @@ class Parser(object):
 		tweet["spacy"]["candidates"] = candidates
 		return tweet
 
+	# Heuristic 1 : Check if there's any candidates, if not we put the twitter Place into candidates
+	def heuristicEmptyCandidate(self, tweet):
+		if not tweet["spacy"]["candidates"]:
+			if tweet["place"]:
+
+				tweet["spacy"]["candidates"] = [key for key in tweet["place"].keys()]
+
+	# Heuristic 2 : Keep only similar candidates and place
+	def heuristicSameCandidate(self, tweet):
+		list = []
+		for candidat in tweet["spacy"]["candidates"]:
+			for elem in tweet["place"]:
+				if candidat in elem:
+					list.append(candidat)
+		tweet["spacy"]["candidates"] = list
 
