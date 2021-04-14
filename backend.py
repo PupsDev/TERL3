@@ -11,7 +11,7 @@ from database import Database
 
 
 if sys.argc > 4:
-	db = Database(sys.argv[2])
+	db = Database(sys.argv[1])
 
 	db.select_database("disastweet")
 
