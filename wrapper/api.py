@@ -98,6 +98,45 @@ class Api(object):
 
         # else :
         #     yield response
+    def get_yielded_recent_search(self,query , fields, max_pages=0):
+        """Get recent search 
+        Args:
+            query:
+                argument to filter the search
+                example: query="from:twitterdev -is:retweet"
+            fields:
+                fields of the tweet we want to retrieve
+                example :tweet.fields="lang,author_id"
+        Returns:
+            A generator
+        """
+        url = self.BASE_URL+ "tweets/search/recent?query={}&{}".format(query, fields)
+
+        response = self._request(url,"recent_search")
+
+        i=0
+        # -> needs review maybe different if parse or not parse 
+        # otherwise yield only the first page
+
+        if max_pages and self._parse:
+            list_tweets = {}
+            list_tweets['tweets'] = response['tweets']
+            meta = response['meta']
+            print("Fetching {} pages ..".format(max_pages))
+
+            while 'next_token' in meta and i < max_pages:
+
+                url = self.BASE_URL+ "tweets/search/recent?query={}&{}&next_token={}".format(query, fields,response['meta']['next_token'])
+                response = self._request(url,"recent_search")
+                meta = response['meta']
+                list_tweets['tweets'].extend(response['tweets'])
+                i+=1
+                yield response['tweets']
+
+
+        else :
+            yield response
+
 
     def get_tweet(self,ids , fields=""):
         """Get a specific tweet or a list of specific tweets by their ids

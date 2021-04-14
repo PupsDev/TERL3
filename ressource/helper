@@ -162,3 +162,13 @@ https://www.researchgate.net/post/Where-can-I-find-a-large-dataset-of-tweets
  git add -A
  git commit -m ""
  git push origin main
+ #########################################################
+
+ Heuristiques :
+  -> Si pas de candidat Spacy -> prendre plus haute proba de twitter
+  -> si candidat spacy et twitter -> selectionné en priorité lui
+
+  http://api.geonames.org/searchJSON?q=Paris&maxRows=1&username=doublepups
+
+  ['geonames'][0]['lng']
+  ['geonames'][0]['lat']
