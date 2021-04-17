@@ -14,7 +14,7 @@ if len(sys.argv) > 4:
 
 	db = client["disastweet"] #selection de la bdd
 
-	collection = db.test #selection de la collection
+	collection = db.spacetweets #selection de la collection
 
 	api = Api(sys.argv[2], True)
 	tweet_fields = "expansions=geo.place_id&tweet.fields=geo,entities,author_id"
