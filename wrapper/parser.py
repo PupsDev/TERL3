@@ -53,7 +53,7 @@ class Parser(object):
 			parsed_tweet['place'] = {}
 			if 'geo' not in tweet :
 				parsed_tweet['geo'] = "NULL"
-				parsed_tweet['valid'] = "False"
+				parsed_tweet['valid'] = "?"
 				parsed_tweet['place_user'] = "NULL"
 				# If there is no geo tag for the tweet we look for informations in annotations
 				if 'entities' in tweet:
@@ -88,7 +88,7 @@ class Parser(object):
 			tweet['text'] = tweet['text'].replace('#', '')
 
 			parsed_tweet['text'] = tweet['text']
-			parsed_tweet['id'] = tweet['id']
+			parsed_tweet['_id'] = tweet['id']
 			parsed_tweet['author_id'] = tweet['author_id']
 
 			parsed_tweet = self.nlp(parsed_tweet,ndlists)

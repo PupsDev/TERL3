@@ -14,7 +14,7 @@ if len(sys.argv) > 4:
 
 	db = client["disastweet"] #selection de la bdd
 
-	collection = db.spacetweets #selection de la collection
+	collection = db.test #selection de la collection
 
 	api = Api(sys.argv[2], True)
 	tweet_fields = "expansions=geo.place_id&tweet.fields=geo,entities,author_id"
@@ -26,7 +26,4 @@ if len(sys.argv) > 4:
 	query = search+"&max_results="+str(max_results)
 	response = api.get_yielded_recent_search(query,tweet_fields,max_pages)
 	for tweets in response:
-		for tweet in tweets:
-			tweet["valid"] = "?"
-
-	collection.insert_many(tweets) #insertion multiple
+		collection.insert_many(tweets) #insertion multiple
