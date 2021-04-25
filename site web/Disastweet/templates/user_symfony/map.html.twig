@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+{% block title %}Disastweet - Map{% endblock %}
+{% block stylesheets %}
+    {{ block("stylesheets", "user_symfony/map_widget.html.twig") }}
+{% endblock %}
+{% block body %}
+    <div class="w-100">
+        <h3 class="mlr-8px text-center">Carte de <a href="{{ path('user_me') }}" >{{ app.user.alias ?: app.user.email }}</a> </h3>
+        {{ block("body", "user_symfony/map_widget.html.twig") }}
+    </div>
+{% endblock %}
+{% block script %}
+    {{ block("script", "user_symfony/map_widget.html.twig") }}
+{% endblock %}

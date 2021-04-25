@@ -1,0 +1,217 @@
+{% extends 'base.html.twig' %}
+{% block title %}Disastweet{% endblock %}
+{% trans_default_domain 'global' %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="/assets/styles/jquery/jquery-ui.min.css"/>
+    <link rel="stylesheet" href="/assets/styles/jquery/jquery-ui.structure.min.css"/>
+    <link rel="stylesheet" href="/assets/styles/jquery/jquery-ui.theme.min.css"/>
+    <link rel="stylesheet" href="/assets/styles/jqueryui.addition.css"/>
+    <style>
+        #extraction-progressbar {
+            margin-top: 20px;
+        }
+
+        .extraction-progressbar-label {
+            font-weight: bold;
+            text-shadow: 1px 1px 0 #fff;
+        }
+    </style>
+{% endblock %}
+{% block body %}
+
+    {% if app.user %}
+        <div class="w50">
+            <h3 class="mlr-8px text-center">Mon Profil</h3>
+            <div id="tabs">
+                <ul class="flex">
+                    <li><a href="#tabs-carte">Carte</a></li>
+                    {% if is_granted('ROLE_VALIDATOR') %}<li><a href="#tabs-validation">Validation</a></li>{% endif %}
+                    <li><a href="#tabs-keywords">Keywords</a></li>
+                    <li><a href="#tabs-param">Parametre</a></li>
+                    {% if is_granted('ROLE_ADMIN') %}<li><a href="#tabs-admin">Administration</a></li>{% endif %}
+                </ul>
+                <div id="tabs-carte">
+                    <div class="center">
+                        <button type="button" class="mlr-8px btn btn-primary" onclick="redirect('{{ url('user_map') }}')">Afficher la carte</button>
+                    </div>
+                </div>
+                {% if is_granted('ROLE_VALIDATOR') %}
+                    <div id="tabs-validation">
+                        <div class="center mb-1em">
+                            <button type="button" class="btn btn-primary" onclick="redirect('{{ url('validation')}}')">Validation</button>
+                        </div>
+                    </div>
+                {% endif %}
+                <div id="tabs-keywords">
+                    <h5 class="text-center">- Ajouter un Keyword -</h5>
+                    <div class="center mb-1em">
+                        <div class="tab_add_keyword">
+                            <input type="text" id="keyword" name="keyword" >
+                            <button type="button" onclick="addKeyword()" class="btn btn-primary" >Ajouter</button>
+                        </div>
+                    </div>
+                    <h5 class="text-center">- Keywords -</h5>
+                    <div class="center">
+                        <ul id="tab_keywords" class="{{ app.user.keywords ? '' : 'empty'}}">
+                            {% if app.user.keywords | length > 0 %}
+                                {% for key in app.user.keywords %}
+                                    <li id="key_{{key}}">
+                                        <label class="align-middle m-auto">{{ key }}</label>
+                                        <button type="button" onclick="removeKeyword('{{key}}')" class="btn-sm btn-danger">Supprimer</button>
+                                    </li>
+                                {% endfor %}
+                            {% else %}
+                                <li><label>Aucun Keywords</label></li>
+                                {% endif %}
+                        </ul>
+                    </div>
+
+                </div>
+                <div id="tabs-param">
+                    <h5 class="text-center">- Clef Tweeter -</h5>
+                    <div class="center mb-1em ">
+                        <div class="tab_add_keyword">
+                            <input type="text" id="tweeter_key" name="twitter_key" value="{{ app.user.getClefTwitter() }}">
+                            <button type="button" onclick="updateTwitterKey()" class="btn btn-primary" >Mettre à jour</button>
+                        </div>
+                    </div>
+                    <div class="center">
+                        <button id="extraction_tweet" type="button" onclick="extraireTweets()" class="mlr-8px btn btn-warning">Extraire Tweets</button>
+                    </div>
+                </div>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <div id="tabs-admin">
+                        <div class="center mb-1em">
+                            <button type="button" class="btn btn-primary" onclick="redirect('{{ url('administration')}}')">Administration</button>
+                        </div>
+                    </div>
+                {% endif %}
+
+            </div>
+
+            <div class="center">
+                <a href="{{ path('app_logout') }}">{{ 'global.logout'|trans }}</a>
+            </div>
+
+        </div>
+        <div id="dialogExtraction" title="Extraction de tweets">
+            <div id='extraction-progress-label' class="progress-label text-center">Extraction en cours...</div>
+            <div id="extraction-progressbar" class="w100"></div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block script %}
+    <script>
+        var extractionEnCours = false;
+        $(function () {
+            $("#tabs").tabs();
+
+            $("#dialogExtraction").dialog({
+                autoOpen: false,
+                closeOnEscape: true,
+                resizable: false,
+                close: function () {
+                    if (!extractionEnCours) {
+                        $("#extraction-progressbar").progressbar({
+                            value: false
+                        });
+                        $("#extraction-progressbar").find(".ui-progressbar-value").css({
+                            "background": '#FFF',
+                        });
+                        $("#extraction-progress-label").html("Extraction en cours...");
+
+                    }
+                },
+            });
+            $("#extraction-progressbar").progressbar({
+                value: false,
+            });
+        });
+
+
+
+
+        function extraireTweets() {
+            $("#dialogExtraction").dialog("open");
+            if (!extractionEnCours) {
+                extractionEnCours = true;
+                $('#extraction_tweet').html("Extraction des tweets...");
+                $.post('{{ path('user_extract_tweets') }}', {}, function (data) {
+                    console.log(data);
+                    if (data.reussite) {
+                        $("#extraction-progressbar").progressbar({
+                            value: 100,
+                        });
+                        $("#extraction-progressbar").find(".ui-progressbar-value").css({
+                            "background": '#0A0',
+                        });
+                        $("#extraction-progress-label").html("Réussite !");
+                    } else {
+                        $("#extraction-progressbar").progressbar({
+                            value: 100,
+                        });
+                        $("#extraction-progressbar").find(".ui-progressbar-value").css({
+                            "background": '#A00',
+                        });
+                        console.log("Echec : " + data.error);
+                        $("#extraction-progress-label").html("Echec : " + data.error);
+                    }
+                    $('#extraction_tweet').html("Extraire Tweets");
+                    extractionEnCours = false;
+                }, "json");
+
+            }
+        }
+
+        //keyword
+        function addKeyword() {
+            if ($('#keyword').val()) {
+                if (($.trim($('#keyword').val())).length > 0) {
+                    $.post('{{ path('user_add_key') }}', {'keyword': $.trim($('#keyword').val())}, function (data) {
+                        if (data.reussite) {
+                            let toadd = '<li id="key_' + data.keyword + '">' + '<label class="align-middle m-auto">' + data.keyword + '</label>\n\
+                            <button type="button" class="btn-sm btn-danger" onclick="removeKeyword(\'' + data.keyword + '\')">Supprimer</button></li>';
+
+                            if ($('#tab_keywords').hasClass('empty')) {
+                                $('#tab_keywords').empty().append(toadd);
+                                $('#tab_keywords').removeClass('empty');
+                            } else {
+                                $('#tab_keywords').append(toadd);
+                            }
+                            $('#keyword').val('');
+                        }
+                    }, "json");
+                }
+            }
+        }
+        function removeKeyword(keyword) {
+            $.post('{{ path('user_remove_key') }}', {'keyword': keyword}, function (data) {
+                if (data.reussite) {
+                    $('#key_' + data.keyword).remove();
+                    if ($('#tab_keywords').children().length <= 0) {
+                        $('#tab_keywords').addClass('empty');
+                        $('#tab_keywords').append('<li>Aucun Keywords</li>');
+                    }
+                }
+            }, "json");
+        }
+
+
+        //redirect
+        function redirect(path) {
+            window.location.href = path;
+        }
+
+        //twitter Key
+        function updateTwitterKey() {
+            let key = $.trim($('#tweeter_key').val());
+            if (key.length > 0) {
+                $.post('{{ path('user_update_twitter_key') }}', {'key': key}, function (data) {
+                    console.log(data);
+                }, "json");
+            }
+        }
+    </script>
+    <script src="{{ asset('assets/scripts/jquery/jquery-ui.min.js') }}"></script>
+{% endblock %}

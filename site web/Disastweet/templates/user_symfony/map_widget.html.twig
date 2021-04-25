@@ -1,0 +1,69 @@
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
+{% endblock %}
+{% block body %}
+    <div class="flex mtb-8px ">
+        <div id="zone_map" class="mlr-8px"></div>
+        <div class="mlr-8px mtb-8px">
+            <div id="map_keywords"  >
+                {% if app.user.keywords | length > 0 %}
+                    {% for key in app.user.keywords %}
+                        <div id="div_cb_{{key}}">
+                            <input class="cb_map mr-8px" type="checkbox" id="cb_{{key}}" name="key_{{ key }}" value="{{ key }}" checked>
+                            <label for="cb_{{key}}">{{ key }}</label>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Aucun Keywords</p>
+                    {% if aio is defined%}
+                        <input type="button" value="En Ajouter" onclick="gotoKeyword()" class="btn btn-secondary">
+                    {% endif %}
+                {% endif %}
+
+            </div>
+            <button id="map_btn_apply" type="button" class="but_map btn btn-primary" onclick="appliquerFiltre()" {{ (app.user.keywords | length <= 0) ? 'style="display : none"': ''}}>Appliquer</button>
+        </div>
+    </div>
+    <div class="accordeon_zone_tweets">
+        <p>Liste des Tweets par Mot Clé</p>
+        <div id="zone_tweets" ></div>
+    </div>
+{% endblock %}
+{% block script %}
+    <script>
+        var mtc;
+        $(function () {
+            mtc = new MapTweetController(L, $, {%if is_granted('ROLE_SUPERADMIN') %}'/FalseQuery.php'{% else %}'{{ path('map_keywordQuery')}}'{%endif%}, 'zone_map', 'zone_tweets', {{ is_granted('ROLE_ADMIN') ? 'true' : 'false' }});
+                    mtc.generateMap(43.6317617, 3.8604249, 2, 18, 1, 9, 1, 0.1);
+            appliquerFiltre();
+            $(".accordeon_zone_tweets").accordion({
+                collapsible: true,
+                active: false,
+                heightStyle: "content",
+            });
+        });
+
+        function appliquerFiltre() {
+            let keywordslist = [];
+            $('.cb_map').each(function (key, value) {
+                if (value.checked) {
+                    keywordslist.push(value.value);
+                }
+            });
+            mtc.webserviceQuery(keywordslist, false);
+        }
+
+        function reportTweet(id, invalide) {
+            $.post('{{ path('map_report_tweet') }}', {'id': id, 'invalide' : invalide}, function (data) {
+                console.log(data);
+            }, 'json');
+        }
+
+
+
+    </script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+    <script src="/assets/scripts/heatmap.min.js"></script>
+    <script src="/assets/scripts/leaflet-heatmap.js"></script>
+    <script src="/assets/scripts/maptweetcontroller.js"></script>
+{% endblock %}

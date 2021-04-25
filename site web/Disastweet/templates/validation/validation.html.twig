@@ -1,0 +1,135 @@
+{% extends 'base.html.twig' %}
+{% block title %}Validation{% endblock %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="/assets/styles/jquery/jquery-ui.min.css"/>
+    <link rel="stylesheet" href="/assets/styles/jquery/jquery-ui.structure.min.css"/>
+    <link rel="stylesheet" href="/assets/styles/jquery/jquery-ui.theme.min.css"/>
+{% endblock %}
+{% block script %}
+    <script src="{{ asset('assets/scripts/jquery/jquery-ui.min.js') }}"></script>
+    <script>
+        let lieux = [];
+        let events = [];
+        function addLieu(lieu) {
+            lieu = removePonctuation(lieu);
+            if ($("#lieu_" + lieu.replace("'", "")).length <= 0) {
+                let data = "<div id='lieu_" + lieu.replace("'", "") + "'>";
+                data += '<input type="button" onclick="removeLieu(`' + lieu + '`)" class="btn btn-secondary" value="' + lieu + '">';
+                // data += '<input type="hidden" id="candidat_' + lieu.replace("'","") + '"value="' + lieu + '">';//dans le cas ou on ne peux pas recuperer les données du bouton
+                data += '</div>'
+
+                $("#liste_candidats").append(data);
+                lieux.push(lieu);
+
+                refreshHiddenCandidates();
+            }
+        }
+        function removeLieu(lieu) {
+            lieu = removePonctuation(lieu);
+            $("#lieu_" + lieu.replace("'", "")).remove();
+            let index = lieux.indexOf(lieu);
+            if (index > -1) {
+                lieux.splice(index, 1);
+            }
+            refreshHiddenCandidates();
+        }
+        function addEvent(event) {
+            event = removePonctuation(event);
+            if ($("#evenement_" + event.replace("'", "")).length <= 0) {
+                let data = "<div id='evenement_" + event.replace("'", "") + "'>";
+                data += '<input type="button" onclick="removeEvent(`' + event + '`)" class="btn btn-secondary" value="' + event + '">';
+                //data += '<input type="hidden" id="event_' + event.replace("'","") + '" value="' + event + '">'; //dans le cas ou on ne peux pas recuperer les données du bouton
+                data += '</div>'
+
+                $("#liste_evenements").append(data);
+                events.push(event);
+                refreshHiddenEvents();
+            }
+        }
+        function removeEvent(event) {
+            event = removePonctuation(event);
+            $("#evenement_" + event.replace("'", "")).remove();
+            let index = events.indexOf(event);
+            if (index > -1) {
+                events.splice(index, 1);
+            }
+            refreshHiddenEvents();
+        }
+
+        function refreshHiddenCandidates() {
+            $('#validation_selection_candidats').val(lieux);
+        }
+        function refreshHiddenEvents() {
+            $('#validation_selection_events').val(events);
+        }
+        function removePonctuation(data) {
+            return data.replace(/[.,\/#!$%\^&\*;:{}=\-`~()]/g, "");
+        }
+        $(function () {
+            $(".accordeon").accordion({
+                collapsible: true,
+                active: false,
+            });
+            refreshHiddenCandidates();
+            refreshHiddenEvents();
+        });
+    </script>
+
+{% endblock %}
+{% block body %}
+    <div class="w-100 mt-5">
+        {% if tweet is not null %}
+            {#<p>{{ dump(tweet) }}</p>#}
+            <div>
+                <p>{{ tweet.text | trim }}</p>
+            </div>
+            <div>
+
+                <p>Lieux</p>
+                <div>
+                    {% for candidat in tweet.spacy.candidates %}
+                        <input type="button" onclick="addLieu(`{{ candidat |lower}}`)" class="btn btn-secondary" value="{{ candidat |lower}}">
+                    {% endfor %}
+                </div>
+                <div class="accordeon">
+                    <p>Utiliser un mot de la phrase</p>
+                    <div>
+                        {% for mot in (tweet.text | trim | split(' ')) %}
+                            <input type="button" onclick="addLieu(`{{ mot | replace({"'" : ""}) |lower }}`)" class="btn btn-secondary" value="{{ mot |lower}}">
+                        {% endfor %}
+                    </div>
+                </div>
+                <div>
+                    <p>Selection</p>
+                    <div id="liste_candidats">
+                    </div>
+                </div>
+                <p>Evenements</p>
+                {% for event in tweet.spacy.events %}
+                    <input type="button" onclick="addEvent(`{{ event |lower}}`)" class="btn btn-secondary" value="{{ event | lower}}">
+                {% endfor %}
+                <div class="accordeon">
+                    <p>Utiliser un mot de la phrase</p>
+                    <div>
+                        {% for mot in (tweet.text | trim | split(' ')) %}
+                            <input type="button" onclick="addEvent('{{ mot | replace({"'" : ""}) | lower }}')" class="btn btn-secondary" value="{{ mot | replace({"'" : ""}) | lower }}">
+                        {% endfor %}
+                    </div>
+                </div>
+                <div>
+                    <p>Selection</p>
+                    <div id="liste_evenements">
+                    </div>
+                </div>
+                {% if error_no_selection %}<p>Veuillez selectionner au moins un (1) lieu et un (1) evenement.</p>{% endif %}
+                {{ form_start(form) }}
+                {{ form_widget(form) }}
+                {{ form_end(form) }}
+            </div>
+        {% else %}
+            <p class="m">Aucun tweet à valider.</p>
+        {% endif %}
+    </div>
+{% endblock %}
+
+

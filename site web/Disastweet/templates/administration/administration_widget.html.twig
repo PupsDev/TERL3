@@ -1,0 +1,132 @@
+{% block stylesheets %}
+    <link rel="stylesheet" href="/assets/styles/jquery/jquery-ui.min.css"/>
+    <link rel="stylesheet" href="/assets/styles/jquery/jquery-ui.structure.min.css"/>
+    <link rel="stylesheet" href="/assets/styles/jquery/jquery-ui.theme.min.css"/>
+    <link rel="stylesheet" href="/assets/styles/jqueryui.addition.css"/>
+{% endblock %}
+{% block body %}
+    <div class="tabs" >
+        <ul>
+            <li class="tabs-li"><a href="#tabs-users">Utilisateurs</a></li>
+            <li class="tabs-li"><a href="#tabs-report">Signalement</a></li>
+        </ul>
+        <div id="tabs-users">
+            <table>
+                <thead>
+                    {% if is_granted('ROLE_SUPERADMIN') %}
+                        <tr>
+                            <th rowspan="2">Email</th>
+                            <th rowspan="2">Alias</th>
+                            <th colspan="2">Roles</th>
+                        </tr>
+                        <tr>
+                            <th>Admin</th>
+                            <th>Validator</th>
+                        </tr>
+                    {% elseif is_granted('ROLE_ADMIN') %}
+                        <tr>
+                            <th>Email</th>
+                            <th>Alias</th>
+                            <th>Validator</th>
+                        </tr>
+                    {% endif %}
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        {% if user.email != app.user.email %}
+                            {% if not(user.isRole('USER_ADMIN') and not is_granted('ROLE_SUPERADMIN')) %}
+                                <tr class="user_row">
+                                    <td class="user_email">{{ user.email }}</td>
+                                    <td class="user_alias">{{ user.alias }}</td>
+                                    {% if is_granted('ROLE_SUPERADMIN') %}
+                                        <td class="user_isadmin">
+                                            <input type="checkbox" class="admin_cb" {% if 'ROLE_ADMIN' in user.roles %}checked{% endif %}>
+                                        </td>
+                                    {% endif %}
+                                    {% if user.isRole('USER_ADMIN') %}
+                                        <td class="user_isvalidator">✓</td>
+                                    {% else %}
+                                        <td class="user_isvalidator"><input type="checkbox" class="validator_cb" {% if 'ROLE_VALIDATOR' in user.roles %}checked{% endif %}></td>
+                                        {% endif %}
+                                </tr>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+
+                </tbody>
+            </table>
+            <button class="btn btn-success" onclick="saveRoles()">Sauvegarder</button>
+            <button class="btn btn-danger" onclick="">Annuler</button>
+        </div>
+        <div id="tabs-report">
+            {% if (reported | length) > 0 %}
+                {% for tweet in reported %}
+                    <div id="report_{{tweet.id}}" >
+                        <p>Texte : {{ tweet.text }}</p>
+                        <p>Lieux :</p>
+                        {% for lieu in tweet.getValidation().places %}
+                            <p>{{ lieu.place}} | Longitude : {{ lieu.lng }} | Latitude : {{ lieu.lat }}</p>
+                        {% endfor %}
+                        <p>Evenements :</p>
+                        {% for event in tweet.getValidation().events %}
+                            <p>{{ event }}</p>
+                        {% endfor %}
+                        <p>Nombres de signalements : {{ tweet.reportedBy | length }}</p>
+                        <input type="button" value="Invalider" onclick="admin_invalide(`{{tweet.id}}`)">
+                        <input type="button" value="Supprimer Signalement" onclick="admin_reset_report(`{{tweet.id}}`)">
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>Aucun Tweet Signalé</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+    <script>
+        let numberOfReport = {{reported | length}};
+        {% if aio is not defined %}
+                    $(".tabs").tabs();
+        {%endif%}
+            function saveRoles() {
+                let dataToSend = [];
+                $(".user_row").each(function (key, value) {
+                    let user = $(value).children(".user_email").html();
+                    let validator = $(value).children(".user_isvalidator").children('.validator_cb')[0].checked;
+        {% if is_granted('ROLE_SUPERADMIN') == true %}
+                    let admin = $(value).children(".user_isadmin").children('.admin_cb')[0].checked;
+                    dataToSend.push({'user': user, 'validator': validator, 'admin': admin});
+        {% else %}
+                    dataToSend.push({'user': user, 'validator': validator});
+        {% endif %}
+                });
+                $.post('{{ path('admin_save_role') }}', {'data': dataToSend}, function (data) {
+                    console.log(data);
+                }, "json");
+            }
+            function admin_invalide(idTweet) {
+                $.post('{{ path('admin_invalide_tweet') }}', {'idTweet': idTweet}, function (data) {
+                    if (data.reussite) {
+                        removeReport(idTweet);
+
+                    }
+                }, "json");
+            }
+            function admin_reset_report(idTweet) {
+                $.post('{{ path('admin_reset_report_tweet') }}', {'idTweet': idTweet}, function (data) {
+                    if (data.reussite) {
+                        removeReport(idTweet);
+                    }
+                }, "json");
+            }
+
+            function removeReport(idTweet) {
+                $('#report_' + idTweet).remove();
+                numberOfReport --;
+                if(numberOfReport <= 0){
+                    $('#tabs-report').html('<p>Aucun Tweet Signalé</p>')
+                }
+            }
+    </script>
+    <script src="{{ asset('assets/scripts/jquery/jquery-ui.min.js') }}"></script>
+{% endblock %}

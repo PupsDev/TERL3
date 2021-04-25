@@ -1,0 +1,164 @@
+{% block stylesheets %}
+    <link rel="stylesheet" href="/assets/styles/jquery/jquery-ui.min.css"/>
+    <link rel="stylesheet" href="/assets/styles/jquery/jquery-ui.structure.min.css"/>
+    <link rel="stylesheet" href="/assets/styles/jquery/jquery-ui.theme.min.css"/>
+{% endblock %}
+
+
+{% block body %}
+    <input id="but_load" type="button" onclick="loadTweet()" value="LOAD">
+    <div id="anchorValidation">
+    </div>
+    <div id="validation_button_zone" style="display : none">
+        <input id="but_valid" type="button" onclick="validateTweet(this)" value="valide">
+        <input id="but_invalid" type="button" onclick="validateTweet(this)" value="invalide">
+        <input id="but_hs" type="button" onclick="validateTweet(this)" value="Hors Sujet">
+    </div>
+
+{% endblock %}
+{% block script %}
+    <script src="{{ asset('assets/scripts/jquery/jquery-ui.min.js') }}"></script>
+    <script> //Script validation
+
+            var autoload
+            = {{ autoload ? 'true' : 'false' }};
+                    let loadedTweet = null;
+
+            $(function () {
+                if (autoload) {
+                    loadTweet();
+                }
+            });
+
+            let lieux = [];
+            let events = [];
+            function addLieu(lieu) {
+                lieu = removePonctuation(lieu);
+                if ($("#lieu_" + lieu.replace("'", "")).length <= 0) {
+                    let data = "<div id='lieu_" + lieu.replace("'", "") + "'>";
+                    data += '<input type="button" onclick="removeLieu(`' + lieu + '`)" class="btn btn-secondary" value="' + lieu + '">';
+                    // data += '<input type="hidden" id="candidat_' + lieu.replace("'","") + '"value="' + lieu + '">';//dans le cas ou on ne peux pas recuperer les données du bouton
+                    data += '</div>'
+
+                    $("#liste_candidats").append(data);
+                    lieux.push(lieu);
+                }
+            }
+            function removeLieu(lieu) {
+                lieu = removePonctuation(lieu);
+                $("#lieu_" + lieu.replace("'", "")).remove();
+                let index = lieux.indexOf(lieu);
+                if (index > -1) {
+                    lieux.splice(index, 1);
+                }
+            }
+            function addEvent(event) {
+                event = removePonctuation(event);
+                if ($("#evenement_" + event.replace("'", "")).length <= 0) {
+                    let data = "<div id='evenement_" + event.replace("'", "") + "'>";
+                    data += '<input type="button" onclick="removeEvent(`' + event + '`)" class="btn btn-secondary" value="' + event + '">';
+                    //data += '<input type="hidden" id="event_' + event.replace("'","") + '" value="' + event + '">'; //dans le cas ou on ne peux pas recuperer les données du bouton
+                    data += '</div>'
+
+                    $("#liste_evenements").append(data);
+                    events.push(event);
+                }
+            }
+            function removeEvent(event) {
+                event = removePonctuation(event);
+                $("#evenement_" + event.replace("'", "")).remove();
+                let index = events.indexOf(event);
+                if (index > -1) {
+                    events.splice(index, 1);
+                }
+            }
+
+            function removePonctuation(data) {
+                return data.replace("/[.,\/#!$%\^&\*;:{}=`~()]\s/g", "");
+            }
+
+            function loadTweet() {
+                $('#but_load').prop('disabled', true);
+                $.post('{{ path('validation_get_tweet') }}', {}, function (data) {
+                    if (data.reussite) {
+                        loadedTweet = data.tweet;
+                        showTweet(data.tweet);
+                        $(".accordeon").accordion({
+                            collapsible: true,
+                            active: false,
+                            heightStyle: "content",
+                        });
+                        $('#but_load').hide();
+                        $('#validation_button_zone').show();
+                    }
+                    $('#but_load').prop('disabled', false);
+                }, "json");
+            }
+
+            function showTweet(tweet) {
+                let html = "<p>" + tweet.text + "</p>" // texte
+                html += "<div>\n<p>Lieux</p>\n<div>";//Début de la partie lieu, et affichage des candidats
+                if (tweet.spacy.candidates.length > 0) {
+                    tweet.spacy.candidates.forEach(candidat => html += '<input type="button" onclick="addLieu(`' + candidat.toLowerCase() + '`)" class="btn btn-secondary" value="' + candidat.toLowerCase() + '">\n');
+                } else {
+                    html += "Aucun lieu proposé";
+                }
+                html += "</div>\n<div class=accordeon>\n<p>Utiliser un mot de la phrase</p>\n<div>"; //Fin des candidats et affichage du contenu de l'accordéon
+                tweet.text.split(' ').forEach(word => {
+                    word = word.trim().toLowerCase();
+                    if (word.length > 0) {
+                        html += '<input type="button" onclick="addLieu(`' + removePonctuation(word) + '`)" class="btn btn-secondary" value="' + word + '">';
+                    }
+                });
+                html += '</div>\n</div>\n<p>Selection</p>\n<div id="liste_candidats"></div>\n</div>'; //fin du contenu de l'accordéon, mise en place du anchor liste_candidats; fin de la partie Lieu
+                html += "<div>\n<p>Evenements</p>\n<div>"; //Début de la partie Events et affichage des events
+                if (tweet.spacy.events.length > 0) {
+                    tweet.spacy.events.forEach(event => html += '<input type="button" onclick="addEvent(`' + event.toLowerCase() + '`)" class="btn btn-secondary" value="' + event.toLowerCase() + '">\n');
+                } else {
+                    html += "Aucun evenement proposé";
+                }
+                html += "</div>\n<div class=accordeon>\n<p>Utiliser un mot de la phrase</p>\n<div>"; //Fin des events et affichage du contenu de l'accordéon
+                tweet.text.split(' ').forEach(word => {
+                    word = word.trim().toLowerCase();
+                    if (word.length > 0) {
+                        html += '<input type="button" onclick="addEvent(`' + removePonctuation(word) + '`)" class="btn btn-secondary" value="' + word + '">';
+                    }
+                });
+                html += '</div>\n</div>\n<p>Selection</p>\n<div id="liste_evenements"></div>\n</div>'; //fin du contenu de l'accordéon, mise en place du anchor liste_evenements; fin de la partie Evenement
+                $("#anchorValidation").html(html);
+            }
+
+            function validateTweet(button) {
+                if (loadedTweet !== null) {
+                    let but_status;
+                    switch ($(button).attr('id')) {
+                        case "but_valid":
+                            but_status = "valid";
+                            break;
+                        case "but_invalid":
+                            but_status = "invalid";
+                            break;
+                        case "but_hs":
+                            but_status = "hs";
+                            break;
+                    }
+                    if (but_status === "valid") {
+
+                        $.post('{{ path('validation_validate_tweet') }}', {"status": but_status, "tweet": loadedTweet, "lieux": lieux, "events": events}, function (data) {
+                            console.log(data);
+                            if (data.reussite) {
+                                loadTweet();
+                            }
+                        }, "json");
+                    } else {
+                        $.post('{{ path('validation_validate_tweet') }}', {"status": but_status, "tweet": loadedTweet}, function (data) {
+                            console.log(data);
+                            if (data.reussite) {
+                                loadTweet();
+                            }
+                        }, "json");
+                    }
+                }
+            }
+    </script>
+{% endblock %}

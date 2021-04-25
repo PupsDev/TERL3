@@ -1,0 +1,8 @@
+.ui-tabs .ui-tabs-nav li {
+    flex: 1;
+    text-align: center;
+}
+.ui-tabs .ui-tabs-nav li a{
+    width: 100%;
+}
+

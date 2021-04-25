@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration{% endblock %}
+{% block stylesheets %}
+    {{ block("stylesheets", "administration/administration_widget.html.twig") }}
+{% endblock %}
+{% block body %}
+    <div class="w80">
+        <div class="center">
+            <h2>Administration</h2>
+        </div>
+        {{ block("body", "administration/administration_widget.html.twig") }}
+    </div>
+{% endblock %}
+{% block script %}
+    {{ block("script", "administration/administration_widget.html.twig") }}
+{% endblock %}

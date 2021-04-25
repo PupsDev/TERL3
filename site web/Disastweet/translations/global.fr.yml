@@ -1,0 +1,7 @@
+global:
+    register : Inscription
+    home : Acceuil
+    login : Connexion
+    logout : Déconnexion
+    map : Carte
+    me : Mon Compte

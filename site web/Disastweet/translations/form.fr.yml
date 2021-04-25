@@ -1,0 +1,13 @@
+form :
+    email: E-Mail
+    alias: Alias
+    password:
+        primary : Mot de passe
+        secondary : Confirmer
+    tweeter :
+        key : Clef Twitter
+    terms : J'accepte les Conditions Générales d'Utilisation
+    submit :
+        register : S'inscrire
+        login : Se Connecter
+    rememberme: Se souvenir de moi

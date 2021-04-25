@@ -1,0 +1,220 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 2 mars 2021, 18:31:52
+    Author     : florentin.denis@etu.umontpellier.fr
+*/
+
+@font-face{
+    src: url("/assets/styles/font/cocogoose/Cocogoose.ttf");
+    font-family: cocogoose;
+    
+}
+
+@font-face{
+    src: url("/assets/styles/font/monospace_typewrite/MonospaceTypewriter.ttf");
+    font-family: Monospace;
+    src: url("/assets/styles/font/liberation_mono/liberation_mono-regular.ttf");
+    font-family: liberation;
+}
+
+.ml-5{
+    margin-left: 5em;
+}
+
+#zone_map{
+    height : 600px; 
+    width : 80%;
+}
+
+body{
+    background-color : #fefee2;
+    
+}
+
+#mybutton{
+    border: 1px black solid;
+}
+
+.fondmap{
+    background-image:url(/assets/images/mapsnight.jpg);
+    color:white;
+}
+
+a{
+    text-decoration: none; 
+}
+
+#aindex{
+    color: white;
+}
+h1{
+    
+}
+
+#disastweetfont{
+    font-family: cocogoose, Comic Sans MS;
+}
+
+.center{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.right{
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+}
+.flex{
+    display: flex;
+}
+.cb_map{
+    margin-bottom: 8px;
+}
+
+.but_map{
+    margin-bottom: 8px;
+}
+.mlr-10per{
+    margin-left : 10%;
+    margin-right : 10%;
+}
+
+.mlr-8px{
+    margin-left : 8px;
+    margin-right : 8px;
+}
+
+.mtb-8px{
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+.padding0{
+    padding: 0;
+}
+
+
+#registration_user label{
+    width:8em;
+
+}
+#registration_user input{
+    width:100%;
+}
+#registration_user div{
+    display: flex;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+
+}
+
+#registration_terms{
+    margin-bottom: 0.5em;
+}
+
+#registration_submit{
+    width: 100%;
+}
+
+.text-center{
+    text-align: center;
+}
+
+.float-right{
+    float : right;
+}
+.float-left{
+    float: left;
+}
+
+#home_div a{
+    display: block;
+    text-align: center;
+    font-weight: bold;
+    font-size: 20px;
+}
+#home_div {
+
+}
+
+.w100{
+    width: 100%;
+}
+.w80{
+    width: 80%;
+}
+.w50{
+    width: 50%;
+}
+.w30{
+    width: 30%;
+}
+#login_form div{
+    margin-bottom: 1em;
+}
+.login_inputdiv{
+    display: flex;
+}
+.login_inputdiv label{
+    width: 10em;
+    margin-right: 10px;
+}
+.login_inputdiv input{
+    width: 100%
+}
+#tab_keywords{
+    margin : 0;
+}
+#tab_keywords li{
+    display: flex;
+    margin-bottom: 1em;
+}
+#tab_keywords li label{
+    width: 100%;
+}
+#tab_keywords li button{
+    width: 10em;
+}
+.tab_add_keyword{
+    display: flex;
+    width: 25em;
+}
+.tab_add_keyword input{
+    width: 100%;
+    margin-right: 1em;
+}
+.tab_add_keyword button{
+    width: 12em;
+}
+
+.mb-1em{
+    margin-bottom: 1em;
+}
+#zone_tweets p{
+    text-align: center
+}
+
+#zone_tweets li{
+    text-align: center;
+    list-style-type: none;
+    margin-bottom: 0.5em;
+}
+
+.font-weight-bold{
+    font-weight: bold;
+}
+
+#home_link{
+    position: absolute;
+    color:white;
+    top : 8px;
+    left : 8px;
+}
+
+#cb_map{
+    display:block;
+}
