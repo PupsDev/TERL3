@@ -2,21 +2,25 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
 {% endblock %}
 {% block body %}
-    <div class="flex mtb-8px ">
-        <div id="zone_map" class="mlr-8px"></div>
-        <div class="mlr-8px mtb-8px">
-            <div id="map_keywords"  >
+    <div class="flex mtb-8px">
+        <div id="zone_map" class="d_flex3"></div>
+        <div class="keywordStyle">
+            <h3 class="center">Mots-Clés</h3>
+            <div id="map_keywords">
                 {% if app.user.keywords | length > 0 %}
                     {% for key in app.user.keywords %}
-                        <div id="div_cb_{{key}}">
-                            <input class="cb_map mr-8px" type="checkbox" id="cb_{{key}}" name="key_{{ key }}" value="{{ key }}" checked>
-                            <label for="cb_{{key}}">{{ key }}</label>
+                        <div id="div_cb_{{key}}" class="d-flex align-items-center m-2">
+                            <label class="switch">
+                                <input class="cb_map" type="checkbox" id="cb_{{key}}" name="key_{{ key }}" value="{{ key }}" checked>
+                                <span class="slider"></span>
+                            </label>
+                            <label for="cb_{{key}}" class="ml1">{{ key }}</label>
                         </div>
                     {% endfor %}
                 {% else %}
-                    <p>Aucun Keywords</p>
+                    <p class="center">Aucun Mot-Clé</p>
                     {% if aio is defined%}
-                        <input type="button" value="En Ajouter" onclick="gotoKeyword()" class="btn btn-secondary">
+                        <input type="button" value="En Ajouter" onclick="gotoKeyword()" class="btn btn-secondary w-100">
                     {% endif %}
                 {% endif %}
 
@@ -54,7 +58,7 @@
         }
 
         function reportTweet(id, invalide) {
-            $.post('{{ path('map_report_tweet') }}', {'id': id, 'invalide' : invalide}, function (data) {
+            $.post('{{ path('map_report_tweet') }}', {'id': id, 'invalide': invalide}, function (data) {
                 console.log(data);
             }, 'json');
         }

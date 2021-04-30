@@ -3,21 +3,11 @@
 {% block title %}Disastweet{% endblock %}
 
 {% block body %}
-    <link href="../../public/assets/styles/global.css" rel="stylesheet" type="text/css"/>
     {% trans_default_domain 'global' %}
 
-    <body class="fondmap" >
-        <h1 style="position: absolute;  top: 40%; left:43%; transform: translateY(-50%); " class="text-center">Bienvenue sur <div id= "disastweetfont" >Disastweet</div></h1>
-        <div id='home_div' class="w100 right">
-            {% if app.user %}
-                <a id='aindex' href="{{ path('user_me') }}" class='' >{{ app.user.alias ?: app.user.email }}</a>
-                <a id='aindex' href="{{ path('app_logout') }}" class='ml-5'>{{ 'global.logout' | trans }}</a>
-            {% else %}
-                <a id='aindex' href="{{ path('app_login') }}" >{{ 'global.login' | trans }}</a>  
-                <a id='aindex' href="{{ path('app_register') }}" class='ml-5'>{{ 'global.register' | trans }}</a>
-            {% endif %}
-        </div>
-    </body>
+    <div class="welcomeTitle margeTopNeg180">Bienvenue sur 
+        <p class="superFont">Disastweet</p>
+    </div>
 
 {% endblock %}
 

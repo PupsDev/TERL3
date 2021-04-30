@@ -6,16 +6,7 @@
     <link rel="stylesheet" href="/assets/styles/jquery/jquery-ui.structure.min.css"/>
     <link rel="stylesheet" href="/assets/styles/jquery/jquery-ui.theme.min.css"/>
     <link rel="stylesheet" href="/assets/styles/jqueryui.addition.css"/>
-    <style>
-        #extraction-progressbar {
-            margin-top: 20px;
-        }
 
-        .extraction-progressbar-label {
-            font-weight: bold;
-            text-shadow: 1px 1px 0 #fff;
-        }
-    </style>
     {{ block("stylesheets", "user_symfony/map_widget.html.twig") }}
     {% if is_granted('ROLE_VALIDATOR') %}
         {{ block("stylesheets", "validation/validation_widget.html.twig") }}
@@ -25,15 +16,14 @@
     {% endif %}
 
 {% endblock %}
-{% block body %}
+{% block superbody %}
 
     {% if app.user %}
-        <div class="w50" >
-            <h3 class="mlr-8px text-center">Mon Profil</h3>
-            <div id="tabAIO" class="tabs" style="display : none;">
+        <div class="center" >
+            <div id="tabAIO" class="tabs w80 semiTranspBack" style="display : none;">
                 <ul class="flex">
                     <li><a href="#tabs-carte">Carte</a></li>
-                    <li><a href="#tabs-keywords">Keywords</a></li>
+                    <li><a href="#tabs-keywords">Mot-Clé</a></li>
                     {% if is_granted('ROLE_VALIDATOR') %}<li><a href="#tabs-validation">Validation</a></li>{% endif %}
                     <li><a href="#tabs-param">Options Avancés</a></li>
                     {% if is_granted('ROLE_ADMIN') %}<li><a href="#tabs-admin">Administration</a></li>{% endif %}
@@ -51,40 +41,40 @@
                     </div>
                 {% endif %}
                 <div id="tabs-keywords">
-                    <h5 class="text-center">- Ajouter un Keyword -</h5>
+                    <h5 class="text-center whiteColor">Ajouter un Mot-Clé</h5>
                     <div class="center mb-1em">
                         <div class="tab_add_keyword">
                             <input type="text" id="keyword" name="keyword" >
-                            <button type="button" onclick="addKeyword()" class="btn btn-primary" >Ajouter</button>
+                            <a href="javascript:void(0)" onclick="addKeyword()" class="icon_add" ></a>
                         </div>
                     </div>
-                    <h5 class="text-center">- Keywords -</h5>
+                    <h5 class="text-center whiteColor">Liste des Mots-Clés</h5>
                     <div class="center">
                         <ul id="tab_keywords" class="{{ app.user.keywords ? '' : 'empty'}}">
                             {% if app.user.keywords | length > 0 %}
                                 {% for key in app.user.keywords %}
                                     <li id="key_{{key}}">
-                                        <label class="align-middle m-auto">{{ key }}</label>
-                                        <button type="button" onclick="removeKeyword('{{key}}')" class="btn-sm btn-danger">Supprimer</button>
+                                        <label class="align-middle m-auto whiteColor">{{ key }}</label>
+                                        <a href="javascript:void(0);" onclick="removeKeyword('{{key}}')" class="icon_trash"></a>
                                     </li>
                                 {% endfor %}
                             {% else %}
-                                <li><label>Aucun Keywords</label></li>
+                                <li><label class="whiteColor">Aucun Keywords</label></li>
                                 {% endif %}
                         </ul>
                     </div>
 
                 </div>
                 <div id="tabs-param">
-                    <h5 class="text-center">- Clef Tweeter -</h5>
+                    <h5 class="text-center whiteColor">Clé Tweeter</h5>
                     <div class="center mb-1em ">
-                        <div class="tab_add_keyword">
+                        <div class="tab_add_keyword w-50">
                             <input type="text" id="tweeter_key" name="twitter_key" value="{{ app.user.getClefTwitter() }}">
-                            <button type="button" onclick="updateTwitterKey()" class="btn btn-primary" >Mettre à jour</button>
+                            <button type="button" onclick="updateTwitterKey()" class="btn btn-secondary" >Mettre à jour</button>
                         </div>
                     </div>
                     <div class="center">
-                        <button id="extraction_tweet" type="button" onclick="extraireTweets()" class="mlr-8px btn btn-warning">Extraire Tweets</button>
+                        <button id="extraction_tweet" type="button" onclick="extraireTweets()" class="mlr-8px btn btn-primary w-25">Extraire Tweets</button>
                     </div>
                 </div>
                 {% if is_granted('ROLE_ADMIN') %}
@@ -95,10 +85,6 @@
                     </div>
                 {% endif %}
 
-            </div>
-
-            <div class="center">
-                <a href="{{ path('app_logout') }}">{{ 'global.logout'|trans }}</a>
             </div>
 
         </div>
@@ -178,8 +164,8 @@
                     $.post('{{ path('user_add_key') }}', {'keyword': $.trim($('#keyword').val())}, function (data) {
                         console.log(data);
                         if (data.reussite) {
-                            let toadd = '<li id="key_' + data.keyword + '">' + '<label class="align-middle m-auto">' + data.keyword + '</label>\n\
-                            <button type="button" class="btn-sm btn-danger" onclick="removeKeyword(`' + data.keyword + '`)">Supprimer</button></li>';
+                            let toadd = '<li id="key_' + data.keyword + '">' + '<label class="align-middle m-auto whiteColor">' + data.keyword + '</label>\n\
+                            <a href="javascript:void(0);" class="icon_trash" onclick="removeKeyword(`' + data.keyword + '`)"></a></li>';
 
                             if ($('#tab_keywords').hasClass('empty')) {
                                 $('#tab_keywords').empty().append(toadd);
@@ -190,7 +176,10 @@
                             if ($('.cb_map').length <= 0) {
                                 $('#map_keywords').html('');
                             }
-                            $('#map_keywords').append('<div id="div_cb_' + data.keyword + '"><input class="cb_map mr-8px" type="checkbox" id="cb_' + data.keyword + '" name="key_' + data.keyword + '" value="' + data.keyword + '" checked><label for="cb_' + data.keyword + '">' + data.keyword + '</label></div>');
+                            let map_key = '<div id="div_cb_' + data.keyword + '" class="d-flex align-items-center m-2">';
+                            map_key += '<label class="switch"><input class="cb_map" type="checkbox" id="cb_' + data.keyword + '" name="key_' + data.keyword + '" value="' + data.keyword + '" checked><span class="slider"></span></label>';
+                            map_key += '<label for="cb_' + data.keyword + '" class="ml1">' + data.keyword + '</label></div>'
+                            $('#map_keywords').append(map_key);
                             if ($('#map_btn_apply').is(':hidden')) {
                                 $('#map_btn_apply').show();
                             }
@@ -209,12 +198,12 @@
                     $('#div_cb_' + data.keyword).remove();
                     if ($('.cb_map').length <= 0) {
                         $('#map_btn_apply').hide();
-                        $('#map_keywords').html('<p>Aucun Keyword</p><input type="button" value="En Ajouter" onclick="gotoKeyword()">');
+                        $('#map_keywords').html('<p class="center">Aucun Keyword</p><input type="button" value="En Ajouter" onclick="gotoKeyword()" class="btn btn-secondary w-100">');
                     }
                     appliquerFiltre();
                     if ($('#tab_keywords').children().length <= 0) {
                         $('#tab_keywords').addClass('empty');
-                        $('#tab_keywords').append('<li>Aucun Keywords</li>');
+                        $('#tab_keywords').append('<li class="whiteColor">Aucun Keywords</li>');
                     }
                 }
             }, "json");

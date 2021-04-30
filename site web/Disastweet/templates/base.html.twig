@@ -3,31 +3,33 @@
 <html>
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{% block title %}Welcome!{% endblock %}</title>
-        {# Run `composer require symfony/webpack-encore-bundle`
-           and uncomment the following Encore helpers to start using Symfony UX #}
-        {# Bootstrap#}
         <link rel="stylesheet" href="/assets/styles/bootstrap.min.css">
         <link rel="stylesheet" href="/assets/styles/global.css">
-        {% block stylesheets %}
-            {#{{ encore_entry_link_tags('app') }}#}
-        {% endblock %}
+        {% block stylesheets %}{% endblock %}
     </head>
     <body>
-        <a href="{{ path('app_home') }}" id="home_link" >{{ 'global.home' | trans }}</a>
-        <div class="center m-2">
-
-                {% block body %}{% endblock %}
-
+        <div class="header">
+            <a class="logo" href="{{ path('app_home')}}">
+                <img border="0" alt="Logo" src="/logo.png" width="70" height="70"> Disastweet
+            </a>
+            {% if app.user %}
+                <a href="{{ path('user_me') }}" class="effect-underline">Compte : {{ app.user.alias ?: app.user.email }}</a>
+                <a href="{{ path('app_logout') }}" class="effect-underline">{{ 'global.logout' | trans }}</a>
+            {% else %}
+                <a href="{{ path('app_login') }}" class="effect-underline">{{ 'global.login' | trans }}</a>  
+            {% endif %}
         </div>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        {# Bootstrap
-        <script src="/assets/scripts/bootstrap/bootstrap.min.js"></script>
-        <script src="/assets/scripts/bootstrap/bootstrap.bundle.min.js"></script>
-        <script src="/assets/scripts/bootstrap/bootstrap.esm.min.js"></script>#}
-        {% block script %}
-            {#{{ encore_entry_script_tags('app') }}#}
+            
+        {% block superbody %}
+            <div class="pageContent">
+                {% block body %}{% endblock %}
+            </div>
         {% endblock %}
+        
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        {% block script %}{% endblock %}
     </body>
 
 </html>

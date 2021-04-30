@@ -3,41 +3,35 @@
 {% block title %}{{ 'global.login' | trans(domain = 'global') }}{% endblock %}
 
 {% block body %}
-    <body class="fondmap" >
-        <div class="w-auto">
-            <h1 style="margin-top:50px;" class="h3 mb-3 font-weight-normal text-center">{{ 'global.login' | trans(domain = 'global') }}</h1>
-            <form method="post" id="login_form" style="position: absolute; top: 40%; left:41%; transform: translateY(-50%);">
-                {% if error %}
-                    <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-                {% endif %}
+    <div class="margeTopNeg180 w-50 semiTranspBack">
+        <form method="post" id="login_form">
+            <h1>{{ 'global.login' | trans(domain = 'global') }}</h1>
+            {% if error %}
+                <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+            {% endif %}
 
 
-                <div class="login_inputdiv">
-                    <label for="inputEmail" class="align-middle m-auto">{{ 'form.email' | trans(domain = 'form') }}</label>
-                    <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control " required autofocus>
-                </div>
-                <div class="login_inputdiv">
-                    <label for="inputPassword" class="align-middle m-auto">{{ 'form.password.primary' | trans(domain = 'form') }}</label>
-                    <input type="password" name="password" id="inputPassword" class="form-control" required >
-                </div>
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+            <div class="login_inputdiv">
+                <label for="inputEmail" class="align-middle m-auto">{{ 'form.email' | trans(domain = 'form') }}</label>
+                <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control " required autofocus>
+            </div>
+            <div class="login_inputdiv">
+                <label for="inputPassword" class="align-middle m-auto">{{ 'form.password.primary' | trans(domain = 'form') }}</label>
+                <input type="password" name="password" id="inputPassword" class="form-control" required >
+            </div>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+            <div class="checkbox mb-3 float-left" >
+                <label>
+                    <input type="checkbox" name="_remember_me"> {{ 'form.rememberme' | trans(domain= 'form')}}
+                </label>
+            </div>
 
 
-                {#Uncomment this section and add a remember_me option below your firewall to activate remember me functionality.
-                See https://symfony.com/doc/current/security/remember_me.html#}
-
-                <div class="checkbox mb-3 float-left" >
-                    <label>
-                        <input type="checkbox" name="_remember_me"> {{ 'form.rememberme' | trans(domain= 'form')}}
-                    </label>
-                </div>
-
-
-                <button id="mybutton" class="btn btn-lg btn-primary w100" type="submit" >
-                    {{ 'form.submit.login' | trans(domain = 'form') }}
-                </button>
-                <a class="btn btn-secondary w100" href='{{ path('app_register') }}'>Pas de compte ? Inscrivez vous ici !</a>
-            </form>
-        </div>
-    </body>
+            <button id="mybutton" class="btn btn-lg btn-primary w-100 mb-2" type="submit" >
+                {{ 'form.submit.login' | trans(domain = 'form') }}
+            </button>
+            <a class="btn btn-secondary w-100" href='{{ path('app_register') }}'>Pas de compte ? Inscrivez vous ici !</a>
+        </form>
+    </div>
 {% endblock %}

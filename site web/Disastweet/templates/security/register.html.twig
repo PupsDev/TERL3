@@ -1,18 +1,44 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}{{ 'global.register' | trans(domain = 'global')}}{% endblock %}
+
 {% block body %}
-    <body class="fondmap">
-    <div class="w30">
+    <div class="margeTopNeg180 w-50 semiTranspBack">
         {{ form_start(form, {'action': path('app_register'), 'method': 'POST'}) }}
         <h1 class='text-center'>Inscription</h1>
-        {{ form_widget(form.user)}}
+        {#
+        {{ form_widget(form.user) }}
+        #}
+        <div id='registration_user'>
+            {{ form_row(form.user.email) }}
+            {{ form_row(form.user.alias) }}
+            {{ form_row(form.user.password) }}
+            <div>
+                {{ form_label(form.user.clefTwitter) }}{{ form_widget(form.user.clefTwitter) }}<p title="Je test" class="tooltipAnchor icon_help flex1"></p>
+            </div>
+        </div>
         <div id='registration_terms'>
             {{ form_widget(form.terms) }}
             {{ form_label(form.terms) }}
         </div>
-        <input id="registration_submit" class="btn btn-success" type="submit" value="{{ 'form.submit.register'|trans(domain = 'form') }}">
+        <div class=" d-flex "><p class="red mr-1">* </p><p class="fontsize12"> : Champs obligatoires</p></div>
+        <input id="registration_submit" class="btn btn-primary btn-lg" type="submit" value="{{ 'form.submit.register'|trans(domain = 'form') }}">
         {{ form_end(form) }}
     </div>
-    </body>
+{% endblock %}
+{% block script %}
+    <script>
+        $(function () {
+            $('.tooltipAnchor').tooltip();
+        });
+    </script>
+    <script src="{{ asset('assets/scripts/jquery/jquery-ui.min.js') }}"></script>
+
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="/assets/styles/jquery/jquery-ui.min.css"/>
+    <link rel="stylesheet" href="/assets/styles/jquery/jquery-ui.structure.min.css"/>
+    <link rel="stylesheet" href="/assets/styles/jquery/jquery-ui.theme.min.css"/>
+    <link rel="stylesheet" href="/assets/styles/jqueryui.addition.css"/>
 {% endblock %}

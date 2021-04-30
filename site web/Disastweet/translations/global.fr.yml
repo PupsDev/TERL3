@@ -1,6 +1,6 @@
 global:
     register : Inscription
-    home : Acceuil
+    home : Accueil
     login : Connexion
     logout : Déconnexion
     map : Carte

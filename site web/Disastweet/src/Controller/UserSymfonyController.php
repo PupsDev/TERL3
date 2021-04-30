@@ -30,7 +30,7 @@ class UserSymfonyController extends AbstractController {
         $this->denyAccessUnlessGranted('ROLE_USER');
         if ($this->isGranted('ROLE_ADMIN')) {
             $users = $userRepository->getAll();
-            $reported = $tweetRepository->getAllReported();
+            $reported = $tweetRepository->getAllValidReported();
             return $this->render('user_symfony/me_aio.html.twig', [
                         'users' => $users,
                         'reported' => $reported,
@@ -116,19 +116,16 @@ class UserSymfonyController extends AbstractController {
         $tweeterKey = $security->getUser()->getClefTwitter();
         $keywords = $security->getUser()->getKeywords();
         if ($tweeterKey == null || $tweeterKey == "") {
-//return $this->json(['reussite' => false, 'error' => 'no tweeter key']);
-            $tweeterKey = "a";
+            return $this->json(['reussite' => false, 'error' => 'no tweeter key']);
         }
         if (sizeof($keywords) <= 0) {
             return $this->json(['reussite' => false, 'error' => 'no keyword']);
         }
         $db = $this->getParameter("mongodb.sslacces");
         $exe = $this->getParameter("location.python");
-//$command = escapeshellcmd("python3 $exe \"$db\" \"$tweeterKey\" \"" . implode(" OR ", trim($keywords)) . "\"");
-//$output = shell_exec($command);
-        sleep(2);
+        $command = escapeshellcmd("python3 $exe \"$db\" \"$tweeterKey\" \"" . implode(" OR ", trim($keywords)) . "\"");
+        $output = shell_exec($command);
         return $this->json(['reussite' => true]);
-//return $this->json(['reussite' => true, 'command' => $command]);
     }
 
     /**

@@ -5,21 +5,18 @@
     <link rel="stylesheet" href="/assets/styles/jqueryui.addition.css"/>
 {% endblock %}
 {% block body %}
-    <div class="tabs" >
-        <ul>
+    <div class="tabs" id="tabAdmin" >
+        <ul class="d-flex">
             <li class="tabs-li"><a href="#tabs-users">Utilisateurs</a></li>
             <li class="tabs-li"><a href="#tabs-report">Signalement</a></li>
         </ul>
         <div id="tabs-users">
-            <table>
+            <table class="w-100 whiteColor">
                 <thead>
                     {% if is_granted('ROLE_SUPERADMIN') %}
                         <tr>
-                            <th rowspan="2">Email</th>
-                            <th rowspan="2">Alias</th>
-                            <th colspan="2">Roles</th>
-                        </tr>
-                        <tr>
+                            <th>Email</th>
+                            <th>Alias</th>
                             <th>Admin</th>
                             <th>Validator</th>
                         </tr>
@@ -32,9 +29,16 @@
                     {% endif %}
                 </thead>
                 <tbody>
+                    {% if  is_granted('ROLE_ADMIN') and not is_granted('ROLE_SUPERADMIN') %}
+                        <tr class="user_row">
+                            <td class="user_email">{{ app.user.email }}</td>
+                            <td class="user_alias">{{  app.user.alias }}</td>
+                            <td class="user_isvalidator"><input type="checkbox" class="validator_cb" {% if 'ROLE_VALIDATOR' in  app.user.roles %}checked{% endif %}></td>
+                        </tr>
+                    {% endif %}
                     {% for user in users %}
                         {% if user.email != app.user.email %}
-                            {% if not(user.isRole('USER_ADMIN') and not is_granted('ROLE_SUPERADMIN')) %}
+                            {% if not((user.isRole('ROLE_ADMIN')or user.isRole('ROLE_SUPERADMIN')) and not is_granted('ROLE_SUPERADMIN')) %}
                                 <tr class="user_row">
                                     <td class="user_email">{{ user.email }}</td>
                                     <td class="user_alias">{{ user.alias }}</td>
@@ -43,11 +47,7 @@
                                             <input type="checkbox" class="admin_cb" {% if 'ROLE_ADMIN' in user.roles %}checked{% endif %}>
                                         </td>
                                     {% endif %}
-                                    {% if user.isRole('USER_ADMIN') %}
-                                        <td class="user_isvalidator">✓</td>
-                                    {% else %}
-                                        <td class="user_isvalidator"><input type="checkbox" class="validator_cb" {% if 'ROLE_VALIDATOR' in user.roles %}checked{% endif %}></td>
-                                        {% endif %}
+                                    <td class="user_isvalidator"><input type="checkbox" class="validator_cb" {% if 'ROLE_VALIDATOR' in user.roles %}checked{% endif %}></td>
                                 </tr>
                             {% endif %}
                         {% endif %}
@@ -55,25 +55,34 @@
 
                 </tbody>
             </table>
-            <button class="btn btn-success" onclick="saveRoles()">Sauvegarder</button>
-            <button class="btn btn-danger" onclick="">Annuler</button>
+            <div class="d-flex justify-content-around mt-4">
+                <button class="btn btn-success w-25" onclick="saveRoles()">Sauvegarder</button>
+                <button class="btn btn-danger w-25" onclick="location.reload()">Annuler</button>
+            </div>
         </div>
         <div id="tabs-report">
             {% if (reported | length) > 0 %}
                 {% for tweet in reported %}
-                    <div id="report_{{tweet.id}}" >
-                        <p>Texte : {{ tweet.text }}</p>
-                        <p>Lieux :</p>
+                    <div id="report_{{tweet.id}}" class="div_report">
+                        <p class="tweetTextStyle"> "{{ tweet.text | trim }}"</p>
+                        <p class="tweetTitleStyle">Lieux</p>
                         {% for lieu in tweet.getValidation().places %}
-                            <p>{{ lieu.place}} | Longitude : {{ lieu.lng }} | Latitude : {{ lieu.lat }}</p>
+                            <div class="d-flex justify-content-around whiteColor">
+                                <p>Lieu : {{ lieu.place }}</p>
+                                <p>Long : {{ lieu.lng }}</p>
+                                <p>Lat : {{ lieu.lat }}</p>
+                            </div>
                         {% endfor %}
-                        <p>Evenements :</p>
+                        <p class="tweetTitleStyle">Evenements</p>
                         {% for event in tweet.getValidation().events %}
-                            <p>{{ event }}</p>
+                            <p class="center whiteColor">{{ event }}</p>
                         {% endfor %}
-                        <p>Nombres de signalements : {{ tweet.reportedBy | length }}</p>
-                        <input type="button" value="Invalider" onclick="admin_invalide(`{{tweet.id}}`)">
-                        <input type="button" value="Supprimer Signalement" onclick="admin_reset_report(`{{tweet.id}}`)">
+                        <p class="tweetTitleStyle">Signalements</p>
+                        <p class="center whiteColor">{{ tweet.reportedBy | length }} signalement(s)</p>
+                        <div class="d-flex justify-content-around">
+                            <input class="btn btn-warning w-25" type="button" value="Supprimer Signalement" onclick="admin_reset_report(`{{tweet.id}}`)">
+                            <input class="btn btn-danger w-25" type="button" value="Invalider" onclick="admin_invalide(`{{tweet.id}}`)">
+                        </div>
                     </div>
                 {% endfor %}
             {% else %}
@@ -101,7 +110,7 @@
         {% endif %}
                 });
                 $.post('{{ path('admin_save_role') }}', {'data': dataToSend}, function (data) {
-                    console.log(data);
+                    location.reload();
                 }, "json");
             }
             function admin_invalide(idTweet) {
@@ -122,8 +131,8 @@
 
             function removeReport(idTweet) {
                 $('#report_' + idTweet).remove();
-                numberOfReport --;
-                if(numberOfReport <= 0){
+                numberOfReport--;
+                if (numberOfReport <= 0) {
                     $('#tabs-report').html('<p>Aucun Tweet Signalé</p>')
                 }
             }

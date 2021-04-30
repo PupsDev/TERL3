@@ -57,5 +57,13 @@ class TweetRepository {
                         ->getQuery()
                         ->execute();
     }
+    public function getAllValidReported() {
+        $qb = $this->dm->createQueryBuilder(TweetDocument::class);
+        return $qb->find()
+                        ->field('valid')->equals("true")
+                        ->field('reported_by')->exists(true)->not($qb->expr()->size(0))
+                        ->getQuery()
+                        ->execute();
+    }
 
 }
