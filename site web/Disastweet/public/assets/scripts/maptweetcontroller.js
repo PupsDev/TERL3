@@ -51,14 +51,18 @@ var MapTweetController = function (leaflet, jquery, urlQuery, mapAnchor, tweetsA
 
         this.map.on('zoomend', function (value) {
             let zoom = value.target.getZoom();
-            if (zoom >= zoomMarker) {
+            let change = false;
+            if (zoom >= zoomMarker && isHeatmap) {
                 isHeatmap = false;
-            } else {
+                change = true;
+            } else if (zoom < zoomMarker && !isHeatmap) {
                 isHeatmap = true;
+                change = true;
             }
             mtc.heatmapLayer.cfg.radius = initialRadius - (zoom * radiusPas);
-            mtc.showDatas(mtc.lastKeywords);
-
+            if (change) {
+                mtc.showDatas(mtc.lastKeywords);
+            }
         });
     };
     this.moveMap = function (lat, lng, zoom) {
@@ -139,9 +143,9 @@ var MapTweetController = function (leaflet, jquery, urlQuery, mapAnchor, tweetsA
                         }
                     }
                     if (mtc.showAdmin) {
-                        forTweetLi += "<li>ID : " + element.id + " | Geo : [" + place.lat + ', ' + place.lng + "] | Text : " + element.text + " <input type='button' class='btn bts-sm btn-secondary' value='Invalider le tweet' onclick='reportTweet(`" + element.id + "`, true)'></li>\n";
+                        forTweetLi += "<li class='d-flex border rounded'><div class='d_flex3 align-self-center'>" + element.text + "</div><input type='button' class='btn bts-sm btn-secondary d_flex1' value='Invalider le tweet' onclick='reportTweet(`" + element.id + "`, true)'></li>\n";
                     } else {
-                        forTweetLi += "<li>ID : " + element.id + " | Geo : [" + place.lat + ', ' + place.lng + "] | Text : " + element.text + " <input type='button' class='btn bts-sm btn-secondary' value='Signaler une erreur' onclick='reportTweet(`" + element.id + "`, false)'></li>\n";
+                        forTweetLi += "<li class='d-flex border rounded '><div class='d_flex3 align-self-center'>" + element.text + "</div><input type='button' class='btn bts-sm btn-secondary d_flex1' value='Signaler une erreur' onclick='reportTweet(`" + element.id + "`, false)'></li>\n";
                     }
                 });
             });
@@ -171,7 +175,7 @@ var MapTweetController = function (leaflet, jquery, urlQuery, mapAnchor, tweetsA
             tweets.forEach(tweet => {
                 let marker = this.L.marker([tweet.geo[0], tweet.geo[1]]);
                 this.markerLayout.addLayer(marker);
-                this.$("#" + this.anchorTweets).append("<li>ID : " + tweet.id + " | Geo : [" + tweet.geo[0] + ', ' + tweet.geo[1] + "] | Text : " + tweet.text + " | Real : " + tweet.real + "</li>");
+                this.$("#" + this.anchorTweets).append("<li>ID : " + tweet.id + " | Geo : [" + tweet.geo[0] + ', ' + tweet.geo[1] + "] | Text : " + tweet.text + "</li>");
             });
         } else {
             tweets.forEach(tweet => {
@@ -229,5 +233,9 @@ var MapTweetController = function (leaflet, jquery, urlQuery, mapAnchor, tweetsA
         } else {
             isHeatmap = false;
         }
+    };
+
+    this.reload = function () {
+        this.map.invalidateSize();
     };
 };

@@ -22,10 +22,10 @@
         <div class="center" >
             <div id="tabAIO" class="tabs w80 semiTranspBack" style="display : none;">
                 <ul class="flex">
+                    <li><a href="#tabs-keywords">Mot-Clés</a></li>
                     <li><a href="#tabs-carte">Carte</a></li>
-                    <li><a href="#tabs-keywords">Mot-Clé</a></li>
                     {% if is_granted('ROLE_VALIDATOR') %}<li><a href="#tabs-validation">Validation</a></li>{% endif %}
-                    <li><a href="#tabs-param">Options Avancés</a></li>
+                    <li><a href="#tabs-param">Extraction</a></li>
                     {% if is_granted('ROLE_ADMIN') %}<li><a href="#tabs-admin">Administration</a></li>{% endif %}
                 </ul>
                 <div id="tabs-carte">
@@ -104,7 +104,12 @@
     <script>
         var extractionEnCours = false;
         $(function () {
-            $(".tabs").tabs();
+            $(".tabs").tabs({activate: function (event, ui) {
+                    if($(event.currentTarget).attr('href') === "#tabs-carte"){
+                        reloadMap();
+                    }
+                }
+            });
 
             $("#dialogExtraction").dialog({
                 autoOpen: false,

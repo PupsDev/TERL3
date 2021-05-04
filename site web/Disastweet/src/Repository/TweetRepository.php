@@ -22,7 +22,12 @@ class TweetRepository {
     }
 
     public function getOneToValidate(): ?TweetDocument {
-        return $this->repos->findOneBy(['valid' => '?']);
+        $elements = $this->repos->findBy(['valid' => '?']);
+        
+        if(sizeof($elements) > 0 ){
+            return $elements[rand(0, sizeof($elements) -1 )];
+        }
+        return null;
     }
 
     public function getOneByID($id): ?TweetDocument {

@@ -9,9 +9,9 @@ if (isset($query)) {
     //$query = array_map('strtolower', $query);
     $precedent = false;
     $sortie = [];
-    if (in_array("tornade", $query) || in_array("*", $query)) {
-        unset($query[array_search('tornade', $query)]);
-        array_push($sortie, ['keyword' => 'tornade', 'data' => [
+    if (in_array("tornado", $query)) {
+        unset($query[array_search('tornado', $query)]);
+        array_push($sortie, ['keyword' => 'tornado', 'data' => [
                 ['author_id' => 0, 'geo' => [45.92608589245598, 71.85444194841196], 'id' => 0, 'place' => NULL, 'place_user' => 'None', 'real' => 'False', 'text' => '#tornade', 'valid' => 'true', 'validation' => ['places' => [['place' => 'France', 'lng' => '71.85444194841196', 'lat' => '45.92608589245598']], 'events' => ['tornade']]],
                 ['author_id' => 1, 'geo' => [51.210482949760454, 63.255660014083894], 'id' => 1, 'place' => NULL, 'place_user' => 'None', 'real' => 'False', 'text' => '#tornade', 'valid' => 'true', 'validation' => ['places' => [['place' => 'France', 'lng' => '63.255660014083894', 'lat' => '51.210482949760454']], 'events' => ['tornade']]],
                 ['author_id' => 2, 'geo' => [45.26102125207986, 63.76468751371067], 'id' => 2, 'place' => NULL, 'place_user' => 'None', 'real' => 'False', 'text' => '#tornade', 'valid' => 'true', 'validation' => ['places' => [['place' => 'France', 'lng' => '63.76468751371067', 'lat' => '45.26102125207986']], 'events' => ['tornade']]],
