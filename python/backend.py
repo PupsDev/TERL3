@@ -1,29 +1,51 @@
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import urlparse, parse_qs
 from wrapper import Api
 import json
 import os
 import sys
 import pymongo
 
-##
-# use :
-# backend.py DB_URL BEARER_TOKEN max_pages keyword
-##
+hostName = "localhost"
+serverPort = 8080
+class MyServer(BaseHTTPRequestHandler):
 
-if len(sys.argv) > 4:
-	client = pymongo.MongoClient(sys.argv[1]) #connexion
+    def do_POST(self):
+        # récupération des données
+        content_length = int(self.headers['Content-Length'])
+        json_post = json.loads(self.rfile.read(content_length));
+        
+        # Execution de l'extraction
+        client = pymongo.MongoClient(json_post["db_url"]) #connexion
+        db = client["disastweet"] #selection de la bdd
+        collection = db.spacetweets #selection de la collection
 
-	db = client["disastweet"] #selection de la bdd
+        api = Api(json_post["bearer_token"], True)
+        tweet_fields = "expansions=geo.place_id&tweet.fields=geo,entities,author_id"
+        max_results = 50
+        max_pages = int(json_post["max_pages"])
+        search = json_post["keyword"]
 
-	collection = db.spacetweets #selection de la collection
+        query = search+"&max_results="+str(max_results)
+        response = api.get_yielded_recent_search(query,tweet_fields,max_pages)
+        #envoie de la réussite de connexion
+        self.send_response(200)
+        self.send_header("Content-type", "application/json")
+        self.end_headers()
+        #traitement
+        for tweets in response:
+            collection.insert_many(tweets) #insertion multiple
+            
+        #envoie de la fin de traitement. rencontre un Timed Out
+        self.wfile.write(bytes('{"reussite" : true}', "utf-8"))
+if __name__ == "__main__":        
+    webServer = ThreadingHTTPServer((hostName, serverPort), MyServer)
+    print("Server started http://%s:%s" % (hostName, serverPort))
 
-	api = Api(sys.argv[2], True)
-	tweet_fields = "expansions=geo.place_id&tweet.fields=geo,entities,author_id"
-	max_results = 50
-	max_pages = int(sys.argv[3])
+    try:
+        webServer.serve_forever()
+    except KeyboardInterrupt:
+        pass
 
-	search = sys.argv[4]
-
-	query = search+"&max_results="+str(max_results)
-	response = api.get_yielded_recent_search(query,tweet_fields,max_pages)
-	for tweets in response:
-		collection.insert_many(tweets) #insertion multiple
+    webServer.server_close()
+    print("Server stopped.")
