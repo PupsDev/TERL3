@@ -21,18 +21,19 @@ class QueryController extends AbstractController {
         //Format a inserer dans output  ['keyword' => 'tornade', 'data' => [ /*tweets*/ ]]
         $datas = $repository->getAllByKeywords($keywords);
         foreach ($keywords as $value) {
-            $output[] = ['keyword' => $value, 'data' => []];
+            $output[] = ['keyword' => strtolower($value), 'data' => []];
         }
-
         while ($datas->valid()) { //vérifie si la donnée est valide
             $donnee = $datas->current(); //récupere la donnée actuelle
             $word = $donnee->getValidation()['events'];
             $max = sizeof($word);
             $count = 0;
             for ($i = 0; $i < sizeof($output) && $count < $max; $i += 1) {
-                if (in_array($output[$i]['keyword'], $word)) {
-                    array_push($output[$i]['data'], $donnee);
-                    $count++;
+                for ($j = 0; $j < sizeof($word); $j += 1) {
+                    if (strcasecmp($output[$i]['keyword'], $word[$j]) == 0) {
+                        array_push($output[$i]['data'], $donnee);
+                        $count++;
+                    }
                 }
             }
 

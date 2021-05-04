@@ -38,7 +38,7 @@
         var mtc;
         $(function () {
             mtc = new MapTweetController(L, $, {%if is_granted('ROLE_SUPERADMIN') %}'/FalseQuery.php'{% else %}'{{ path('map_keywordQuery')}}'{%endif%}, 'zone_map', 'zone_tweets', {{ is_granted('ROLE_ADMIN') ? 'true' : 'false' }});
-                    mtc.generateMap(43.6317617, 3.8604249, 2, 18, 1, 9, 1, 0.1);
+                    mtc.generateMap(43.6317617, 3.8604249, 2, 18, 2, 9, 1, 0.1);
             appliquerFiltre();
             $(".accordeon_zone_tweets").accordion({
                 collapsible: true,

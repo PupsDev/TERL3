@@ -44,7 +44,12 @@
                     <h5 class="text-center whiteColor">Ajouter un Mot-Clé</h5>
                     <div class="center mb-1em">
                         <div class="tab_add_keyword">
-                            <input type="text" id="keyword" name="keyword" >
+                            {#<input type="text" id="keyword" name="keyword" >#}
+                            <select class="form-select" id="keyword-select">
+                                {% for keyword in keywords %}
+                                    <option value="{{ keyword }}">{{ keyword }}</option>
+                                {% endfor %}
+                            </select>
                             <a href="javascript:void(0)" onclick="addKeyword()" class="icon_add" ></a>
                         </div>
                     </div>
@@ -159,10 +164,11 @@
 
         //keyword
         function addKeyword() {
-            if ($('#keyword').val()) {
-                if (($.trim($('#keyword').val())).length > 0) {
-                    $.post('{{ path('user_add_key') }}', {'keyword': $.trim($('#keyword').val())}, function (data) {
-                        console.log(data);
+            let value = $('#keyword-select').val()
+            if (value) {
+                value = $.trim(value.toLowerCase());
+                if (value.length > 0) {
+                    $.post('{{ path('user_add_key') }}', {'keyword': value}, function (data) {
                         if (data.reussite) {
                             let toadd = '<li id="key_' + data.keyword + '">' + '<label class="align-middle m-auto whiteColor">' + data.keyword + '</label>\n\
                             <a href="javascript:void(0);" class="icon_trash" onclick="removeKeyword(`' + data.keyword + '`)"></a></li>';
@@ -184,7 +190,6 @@
                                 $('#map_btn_apply').show();
                             }
                             appliquerFiltre();
-                            $('#keyword').val('');
                         }
                     }, "json");
                 }
@@ -214,7 +219,7 @@
             let key = $.trim($('#tweeter_key').val());
             if (key.length > 0) {
                 $.post('{{ path('user_update_twitter_key') }}', {'key': key}, function (data) {
-                    console.log(data);
+                    location.reload()
                 }, "json");
             }
         }

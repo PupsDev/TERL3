@@ -26,12 +26,14 @@ class GlobalController extends AbstractController {
         $db = $this->getParameter("mongodb.sslacces");
         $maxpage = 3;
         $keyword = "Saturne";
-        $command = "/usr/bin/python3 /home/terl3/www/site/disastweet/python/backend.py \"$db\" \"$bearer\" $maxpage \"$keyword\"";
-        dump($command);
+        //$command = "/usr/bin/python3 /home/terl3/www/site/disastweet/python/backend.py \"$db\" \"$bearer\" $maxpage \"$keyword\"";
+        //$command = "pip install pymongo";
+        //$command = 'pip freeze';
         //$output = shell_exec($command);
         $output = shell_exec($command.' 2>&1');//Pour le DEBUG
         dump($output);
         return $this->render('base.html.twig');
     }
+    
 
 }

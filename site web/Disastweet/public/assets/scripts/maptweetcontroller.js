@@ -48,9 +48,6 @@ var MapTweetController = function (leaflet, jquery, urlQuery, mapAnchor, tweetsA
         this.map.addLayer(this.heatmapLayer);
 
         let mtc = this;
-        /*this.map.on('move', function () {
-         mtc.setIsHeatmapMarkerAndShow();
-         });*/
 
         this.map.on('zoomend', function (value) {
             let zoom = value.target.getZoom();
@@ -68,12 +65,15 @@ var MapTweetController = function (leaflet, jquery, urlQuery, mapAnchor, tweetsA
         this.map.setView(lat, lng, zoom);
     };
     this.webserviceQuery = function (keywords, forceUpdate) {
+        for (let i = 0; i < keywords.length; i++) {
+            keywords[i] = keywords[i].toLowerCase();
+        }
         let mtc = this;
         let fillKeywords = [];
         if (!forceUpdate) {
             keywords.forEach(function (element) {
-                if (!mtc.keywordData.find(x => x.keyword === element)) {
-                    fillKeywords.push(element);
+                if (!mtc.keywordData.find(x => x.keyword.toLowerCase() === element.toLowerCase())) {
+                    fillKeywords.push(element.toLowerCase());
                 }
             });
         } else {
@@ -82,7 +82,8 @@ var MapTweetController = function (leaflet, jquery, urlQuery, mapAnchor, tweetsA
         if (fillKeywords.length > 0) {
             this.$.post(this.url, {'query': fillKeywords}, function (data) {
                 $.each(data, function (key, value) {
-                    let cle = mtc.keywordData.find(x => x.keyword === value.keyword);
+                    value.keyword = value.keyword.toLowerCase();
+                    let cle = mtc.keywordData.find(x => x.keyword.toLowerCase() === value.keyword.toLowerCase());
                     if (cle) {
                         cle.data = value.data;
                     } else {
@@ -100,61 +101,7 @@ var MapTweetController = function (leaflet, jquery, urlQuery, mapAnchor, tweetsA
             this.showDatas(keywords);
         }
     };
-    /*this.showDatas = function (keywords, heatmap) {
-     
-     let mtc = this;
-     this.deleteTweets();
-     this.deletesMarkers();
-     var heatmapData = [];
-     var maxHeatmap = 1;
-     
-     keywords.forEach(keyword => {
-     let forTweet = "<div class='accordeonKeyword'><p class='font-weight-bold'>- " + keyword + " -</p>\n";
-     let forTweetLi = "";
-     let data = mtc.keywordData.find(x => x.keyword === keyword).data;
-     let empty = true;
-     
-     data.forEach(function (element) {
-     empty = false;
-     element.validation.places.forEach(function (place) {
-     if (!heatmap) {
-     let marker = mtc.L.marker([place.lat, place.lng]);
-     mtc.markerLayout.addLayer(marker);
-     } else {
-     let present = heatmapData.find(data => (data.lat === place.lat && data.lng === place.lng));
-     if (present) {
-     present.count += 1;
-     if (present.count > maxHeatmap) {
-     maxHeatmap = present.count;
-     }
-     } else {
-     heatmapData.push({lat: place.lat, lng: place.lng, count: 1});
-     }
-     }
-     forTweetLi += "<li>ID : " + element.id + " | Geo : [" + place.lat + ', ' + place.lng + "] | Text : " + element.text + " | Real : " + element.real + "</li>\n";
-     });
-     });
-     
-     if (empty) {
-     forTweet += "<p>Aucune Données</p>";
-     } else {
-     forTweet += "<ul id='list_" + keyword + "'>\n" + forTweetLi + "</ul></div>\n";
-     }
-     if (mtc.anchorTweets) {
-     mtc.$("#" + mtc.anchorTweets).append(forTweet);
-     }
-     });
-     if (heatmap && heatmapData.length > 0) {
-     this.heatmapLayer.setData({max: maxHeatmap, min: 0, data: heatmapData});
-     } else {
-     this.heatmapLayer.setData({max: maxHeatmap, min: 0, data: []});
-     }
-     $('.accordeonKeyword').accordion({
-     collapsible: true,
-     active: false,
-     heightStyle: "content",
-     });
-     };*/
+
     this.showDatas = function (keywords) {
 
         let mtc = this;
@@ -176,9 +123,9 @@ var MapTweetController = function (leaflet, jquery, urlQuery, mapAnchor, tweetsA
                         let marker = mtc.L.marker([place.lat, place.lng]);
                         mtc.markerLayout.addLayer(marker);
                         if (mtc.showAdmin) {
-                            marker.bindPopup("<p>" + element.text + "</p><input type='button' value='Invalider le tweet' onclick='reportTweet(`" + element.id + "`, true)'>");
+                            marker.bindPopup("<p>" + element.text + "</p><input type='button' class='btn bts-sm btn-secondary w-100' value='Invalider le tweet' onclick='reportTweet(`" + element.id + "`, true)'>");
                         } else {
-                            marker.bindPopup("<p>" + element.text + "</p><input type='button' value='Signaler une erreur' onclick='reportTweet(`" + element.id + "`, false)'>");
+                            marker.bindPopup("<p>" + element.text + "</p><input type='button' class='btn bts-sm btn-secondary w-100' value='Signaler une erreur' onclick='reportTweet(`" + element.id + "`, false)'>");
                         }
                     } else {
                         let present = heatmapData.find(data => (data.lat === place.lat && data.lng === place.lng));
@@ -191,7 +138,11 @@ var MapTweetController = function (leaflet, jquery, urlQuery, mapAnchor, tweetsA
                             heatmapData.push({lat: place.lat, lng: place.lng, count: 1});
                         }
                     }
-                    forTweetLi += "<li>ID : " + element.id + " | Geo : [" + place.lat + ', ' + place.lng + "] | Text : " + element.text + " | Real : " + element.real + "</li>\n";
+                    if (mtc.showAdmin) {
+                        forTweetLi += "<li>ID : " + element.id + " | Geo : [" + place.lat + ', ' + place.lng + "] | Text : " + element.text + " <input type='button' class='btn bts-sm btn-secondary' value='Invalider le tweet' onclick='reportTweet(`" + element.id + "`, true)'></li>\n";
+                    } else {
+                        forTweetLi += "<li>ID : " + element.id + " | Geo : [" + place.lat + ', ' + place.lng + "] | Text : " + element.text + " <input type='button' class='btn bts-sm btn-secondary' value='Signaler une erreur' onclick='reportTweet(`" + element.id + "`, false)'></li>\n";
+                    }
                 });
             });
 
@@ -212,7 +163,7 @@ var MapTweetController = function (leaflet, jquery, urlQuery, mapAnchor, tweetsA
         $('.accordeonKeyword').accordion({
             collapsible: true,
             active: false,
-            heightStyle: "content",
+            heightStyle: "content"
         });
     };
     this.markersByTweets = function (tweets) {

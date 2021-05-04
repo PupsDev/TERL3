@@ -16,3 +16,6 @@
 ###< symfony/phpunit-bridge ###
 
 /.mongodb.pem
+/python/*
+!/python/README
+/nbproject

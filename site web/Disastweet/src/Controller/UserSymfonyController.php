@@ -28,6 +28,16 @@ class UserSymfonyController extends AbstractController {
      */
     public function meAllInOne(Security $security, UserSymfonyRepository $userRepository, TweetRepository $tweetRepository): Response {
         $this->denyAccessUnlessGranted('ROLE_USER');
+        $keywords = [];
+        
+        //Read keywords 
+        $fichier = fopen($this->getParameter("location.python") . "keyWord.txt", "r") or null;
+        if($fichier != null){
+            while(!feof($fichier)){
+                array_push($keywords, strtolower(trim(fgets($fichier))));
+            }
+            fclose($fichier);
+        }
         if ($this->isGranted('ROLE_ADMIN')) {
             $users = $userRepository->getAll();
             $reported = $tweetRepository->getAllValidReported();
@@ -36,11 +46,13 @@ class UserSymfonyController extends AbstractController {
                         'reported' => $reported,
                         'autoload' => false,
                         'aio' => true,
+                        'keywords' => $keywords,
             ]);
         }
         return $this->render('user_symfony/me_aio.html.twig', [
                     'autoload' => false,
                     'aio' => true,
+                    'keywords' => $keywords,
         ]);
     }
 
@@ -121,11 +133,15 @@ class UserSymfonyController extends AbstractController {
         if (sizeof($keywords) <= 0) {
             return $this->json(['reussite' => false, 'error' => 'no keyword']);
         }
-        $db = $this->getParameter("mongodb.sslacces");
+        $db = $this->getParameter("mongodb.sslaccess");
         $exe = $this->getParameter("location.python");
-        $command = escapeshellcmd("python3 $exe \"$db\" \"$tweeterKey\" \"" . implode(" OR ", trim($keywords)) . "\"");
-        $output = shell_exec($command);
-        return $this->json(['reussite' => true]);
+        //$command = "python3 " . $exe . "backend.py '$db' '$tweeterKey' '1' '" . escapeshellcmd(implode("", $keywords)) . "'";
+        $command = "python3 " . $exe . "backend.py '$db' '$tweeterKey' '1' '" . $keywords[0] . "'";
+        //$output = shell_exec($command);
+        $output = shell_exec($command . ' 2>&1'); //Pour le DEBUG
+        //$process = new \Symfony\Component\Process\Process(['python3', $exe . "backend.py", $db ,$tweeterKey, 1, $keywords[0]]);
+
+        return $this->json(['reussite' => true, 'command' => $command, 'output' => $output]);
     }
 
     /**

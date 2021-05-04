@@ -29,6 +29,7 @@ class TweetRepository {
         return $this->repos->findOneBy(['id' => $id]);
     }
 
+    
     public function flush() {
         $this->dm->flush();
     }
@@ -37,7 +38,13 @@ class TweetRepository {
         return $this->dm->createQueryBuilder(TweetDocument::class)
                         ->find()
                         ->field('valid')->equals("true")
-                        ->field('validation.events')->in($keywords)
+                        ->field('validation.events')->where('function(){ keywords = ' . json_encode($keywords) .'; '
+                                . 'for(let i = 0; i < this.validation.events.length; i+=1){'
+                                . 'for(let j = 0; j < keywords.length; j+=1){'
+                                . 'if(this.validation.events[i].toLowerCase() === keywords[j].toLowerCase()){return true;}'
+                                . '}'
+                                . '}return false;'
+                                . '}')
                         ->getQuery()
                         ->execute();
     }

@@ -6,7 +6,8 @@
 parameters:
     env(MONGODB_URL): ''
     env(MONGODB_DB): ''
-    mongodb.sslacces : '%env(resolve:MONGODB_URL)%?authSource=admin&tls=true&tlsCAFile=%kernel.project_dir%/mongodb.pem'
+    mongodb.sslaccess : '%env(resolve:MONGODB_URL_SSL)%%kernel.project_dir%/mongodb.pem'
+    #mongodb.sslacces : '%env(resolve:MONGODB_URL)%?authSource=admin&tls=true&tlsCAFile='
     location.python : '%kernel.project_dir%/python/'
     
 services:
