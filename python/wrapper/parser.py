@@ -50,7 +50,7 @@ class Parser(object):
 
 		for tweet in tweets_json['data']:
 			parsed_tweet = {}
-			parsed_tweet['place'] = {}
+			parsed_tweet['place'] = []
 			if 'geo' not in tweet :
 				parsed_tweet['geo'] = "NULL"
 				parsed_tweet['valid'] = "?"
@@ -58,9 +58,14 @@ class Parser(object):
 				# If there is no geo tag for the tweet we look for informations in annotations
 				if 'entities' in tweet:
 					if 'annotations' in tweet['entities']:
+						zone_proba = {}
+						zone_proba["zone"] = ""
+						zone_proba["proba"] = 0.
 						for annotation in tweet['entities']['annotations']:
 							if 'Place' in annotation['type']:
-								parsed_tweet['place'][annotation['normalized_text']] = annotation['probability']
+								zone_proba["zone"] = annotation['normalized_text']
+								zone_proba["proba"] = annotation['probability']
+								parsed_tweet['place'].append(zone_proba)
 
 			else:
 
@@ -140,19 +145,19 @@ class Parser(object):
 		tweet["spacy"]["candidates"] = candidates
 		return tweet
 
-	# Heuristic 1 : Check if there's any candidates, if not we put the twitter Place into candidates
-	def heuristicEmptyCandidate(self, tweet):
-		if not tweet["spacy"]["candidates"]:
-			if tweet["place"]:
+	# # Heuristic 1 : Check if there's any candidates, if not we put the twitter Place into candidates
+	# def heuristicEmptyCandidate(self, tweet):
+	# 	if not tweet["spacy"]["candidates"]:
+	# 		if tweet["place"]:
 
-				tweet["spacy"]["candidates"] = [key for key in tweet["place"].keys()]
+	# 			tweet["spacy"]["candidates"] = [key for key in tweet["place"].keys()]
 
-	# Heuristic 2 : Keep only similar candidates and place
-	def heuristicSameCandidate(self, tweet):
-		list = []
-		for candidat in tweet["spacy"]["candidates"]:
-			for elem in tweet["place"]:
-				if candidat in elem:
-					list.append(candidat)
-		tweet["spacy"]["candidates"] = list
+	# # Heuristic 2 : Keep only similar candidates and place
+	# def heuristicSameCandidate(self, tweet):
+	# 	list = []
+	# 	for candidat in tweet["spacy"]["candidates"]:
+	# 		for elem in tweet["place"]:
+	# 			if candidat in elem:
+	# 				list.append(candidat)
+	# 	tweet["spacy"]["candidates"] = list
 
