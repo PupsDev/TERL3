@@ -34,7 +34,11 @@ class MyServer(BaseHTTPRequestHandler):
         self.end_headers()
         #traitement
         for tweets in response:
-            collection.insert_many(tweets) #insertion multiple
+            try:
+                collection.insert_many(tweets) #insertion multiple
+            except Exception as e:
+                print(e)
+            
             
         #envoie de la fin de traitement. rencontre un Timed Out
         self.wfile.write(bytes('{"reussite" : true}', "utf-8"))
