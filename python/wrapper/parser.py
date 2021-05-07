@@ -65,7 +65,8 @@ class Parser(object):
 							if 'Place' in annotation['type']:
 								zone_proba["zone"] = annotation['normalized_text']
 								zone_proba["proba"] = annotation['probability']
-								parsed_tweet['place'].append(zone_proba)
+								if zone_proba not in parsed_tweet['place']:
+									parsed_tweet['place'].append(zone_proba)
 
 			else:
 
