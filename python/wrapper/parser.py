@@ -146,19 +146,19 @@ class Parser(object):
 		tweet["spacy"]["candidates"] = candidates
 		return tweet
 
-	# # Heuristic 1 : Check if there's any candidates, if not we put the twitter Place into candidates
-	# def heuristicEmptyCandidate(self, tweet):
-	# 	if not tweet["spacy"]["candidates"]:
-	# 		if tweet["place"]:
+	# Heuristic 1 : Check if there's any candidates, if not we put the twitter Place into candidates
+	def heuristicEmptyCandidate(self, tweet):
+		if not tweet["spacy"]["candidates"]:
+			if isinstance(tweet["place"], list):
 
-	# 			tweet["spacy"]["candidates"] = [key for key in tweet["place"].keys()]
+				tweet["spacy"]["candidates"] = [x['zone'] for x in tweet["place"]]
 
-	# # Heuristic 2 : Keep only similar candidates and place
-	# def heuristicSameCandidate(self, tweet):
-	# 	list = []
-	# 	for candidat in tweet["spacy"]["candidates"]:
-	# 		for elem in tweet["place"]:
-	# 			if candidat in elem:
-	# 				list.append(candidat)
-	# 	tweet["spacy"]["candidates"] = list
+	# Heuristic 2 : Keep only similar candidates and place
+	def heuristicSameCandidate(self, tweet):
+		new_candicates = []
+		for candidat in tweet["spacy"]["candidates"]:
+			for elem in tweet["place"]:
+				if candidat == elem['zone']:
+					new_candicates.append(candidat)
+		tweet["spacy"]["candidates"] = new_candicates
 
