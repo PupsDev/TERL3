@@ -13,9 +13,9 @@
     </div>
     <div id="validation_button_zone" style="display : none">
         <div class="d-flex justify-content-around mt-2">
-            <input id="but_valid" type="button" onclick="validateTweet(this)" value="Valide" class="btn btn-success w-25">
-            <input id="but_hs" type="button" onclick="validateTweet(this)" value="Hors Sujet" class="btn btn-secondary w-25">
-            <input id="but_invalid" type="button" onclick="validateTweet(this)" value="Invalide" class="btn btn-danger w-25">
+            <input id="but_valid" type="button" onclick="validateTweet(this)" value="Valide" class="btn btn-success w-25 tooltipAnchor" title="Un tweet est valide si il contient au moins un lieu et un événement de catastrophe naturelle interdépendant.">
+            <input id="but_hs" type="button" onclick="validateTweet(this)" value="Hors Sujet" class="btn btn-secondary w-25 tooltipAnchor" title="Un tweet est hors sujet si il n'est pas du tout en raccord avec les catastrophes naturelles.">
+            <input id="but_invalid" type="button" onclick="validateTweet(this)" value="Invalide" class="btn btn-danger w-25 tooltipAnchor" title="Un tweet est invalide si il parle de catastrophe naturelles mais ne contient aucun lieu.">
         </div>
     </div>
 
@@ -33,6 +33,10 @@
                         loadTweet();
                     }
                 });
+                
+                function loadTooltipValidation(){
+                    $(".tooltipAnchorValidation").tooltip();
+                }
 
                 let lieux = [];
                 let events = [];
@@ -40,12 +44,13 @@
                     lieu = removePonctuation(lieu);
                     if ($("#lieu_" + lieu.replace("'", "")).length <= 0) {
                         let data = "<div id='lieu_" + lieu.replace("'", "") + "' class='mtb-8px'>";
-                        data += '<input type="button" onclick="removeLieu(`' + lieu + '`)" class="btn btn-secondary" value="' + lieu + '">';
+                        data += '<input type="button" onclick="removeLieu(`' + lieu + '`)" class="btn btn-secondary tooltipAnchorValidation" value="' + lieu + '" title="Supprimer le lieu de la sélection.">';
                         // data += '<input type="hidden" id="candidat_' + lieu.replace("'","") + '"value="' + lieu + '">';//dans le cas ou on ne peux pas recuperer les données du bouton
                         data += '</div>'
 
                         $("#liste_candidats").append(data);
                         lieux.push(lieu);
+                        loadTooltipValidation();
                     }
                 }
                 function removeLieu(lieu) {
@@ -60,12 +65,13 @@
                     event = removePonctuation(event);
                     if ($("#evenement_" + event.replace("'", "")).length <= 0) {
                         let data = "<div id='evenement_" + event.replace("'", "") + "' class='mtb-8px'>";
-                        data += '<input type="button" onclick="removeEvent(`' + event + '`)" class="btn btn-secondary" value="' + event + '">';
+                        data += '<input type="button" onclick="removeEvent(`' + event + '`)" class="btn btn-secondary tooltipAnchorValidation" value="' + event + '" title="Supprimer l\'evenement de la sélection ">';
                         //data += '<input type="hidden" id="event_' + event.replace("'","") + '" value="' + event + '">'; //dans le cas ou on ne peux pas recuperer les données du bouton
                         data += '</div>'
 
                         $("#liste_evenements").append(data);
                         events.push(event);
+                        loadTooltipValidation();
                     }
                 }
                 function removeEvent(event) {
@@ -103,7 +109,7 @@
                     let html = "<p class='tweetTextStyle'> \"" + tweet.text.trim() + "\" </p>" // texte
                     html += "<div>\n<p class='tweetTitleStyle'>Lieux</p>\n<div class='d-flex justify-content-around mtb-8px'>";//Début de la partie lieu, et affichage des candidats
                     if (tweet.spacy.candidates.length > 0) {
-                        tweet.spacy.candidates.forEach(candidat => html += '<input type="button" onclick="addLieu(`' + candidat.toLowerCase() + '`)" class="btn btn-secondary" value="' + candidat.toLowerCase() + '">\n');
+                        tweet.spacy.candidates.forEach(candidat => html += '<input type="button" onclick="addLieu(`' + candidat.toLowerCase() + '`)" class="btn btn-secondary tooltipAnchorValidation" title="Ajouter le lieu à la sélection" value="' + candidat.toLowerCase() + '">\n');
                     } else {
                         html += "<p class='whiteColor center'>Aucun lieu proposé par le système.</p>";
                     }
@@ -111,13 +117,13 @@
                     tweet.text.split(' ').forEach(word => {
                         word = word.trim().toLowerCase();
                         if (word.length > 0) {
-                            html += '<input type="button" onclick="addLieu(`' + removePonctuation(word) + '`)" class="btn btn-secondary mtb-8px" value="' + word + '">';
+                            html += '<input type="button" onclick="addLieu(`' + removePonctuation(word) + '`)" class="btn btn-secondary mtb-8px tooltipAnchorValidation" title="Ajouter le lieu à la sélection" value="' + word + '">';
                         }
                     });
-                    html += '</div></div>\n</div>\n<p class="whiteColor">Selection :</p>\n<div id="liste_candidats" class="d-flex justify-content-around flex-wrap"></div>\n</div>'; //fin du contenu de l'accordéon, mise en place du anchor liste_candidats; fin de la partie Lieu
-                    html += "<div>\n<p class='tweetTitleStyle'>Evenements</p>\n<div class='d-flex justify-content-around mtb-8px'>"; //Début de la partie Events et affichage des events
+                    html += '</div></div>\n</div>\n<p class="whiteColor">Sélection :</p>\n<div id="liste_candidats" class="d-flex justify-content-around flex-wrap"></div>\n</div>'; //fin du contenu de l'accordéon, mise en place du anchor liste_candidats; fin de la partie Lieu
+                    html += "<div>\n<p class='tweetTitleStyle'>Événements</p>\n<div class='d-flex justify-content-around mtb-8px'>"; //Début de la partie Events et affichage des events
                     if (tweet.spacy.events.length > 0) {
-                        tweet.spacy.events.forEach(event => html += '<input type="button" onclick="addEvent(`' + event.toLowerCase() + '`)" class="btn btn-secondary" value="' + event.toLowerCase() + '">\n');
+                        tweet.spacy.events.forEach(event => html += '<input type="button" onclick="addEvent(`' + event.toLowerCase() + '`)" class="btn btn-secondary tooltipAnchorValidation" title="Ajouter l\'événement à la sélection" value="' + event.toLowerCase() + '">\n');
                     } else {
                         html += "<p class='whiteColor center'>Aucun évènement proposé par le système.</p>";
                     }
@@ -125,11 +131,12 @@
                     tweet.text.split(' ').forEach(word => {
                         word = word.trim().toLowerCase();
                         if (word.length > 0) {
-                            html += '<input type="button" onclick="addEvent(`' + removePonctuation(word) + '`)" class="btn btn-secondary mtb-8px" value="' + word + '">';
+                            html += '<input type="button" onclick="addEvent(`' + removePonctuation(word) + '`)" class="btn btn-secondary mtb-8px tooltipAnchorValidation" title="Ajouter l\'événement à la sélection" value="' + word + '">';
                         }
                     });
-                    html += '</div></div>\n</div>\n<p class="whiteColor">Selection :</p>\n<div id="liste_evenements" class="d-flex justify-content-around flex-wrap"></div>\n</div>'; //fin du contenu de l'accordéon, mise en place du anchor liste_evenements; fin de la partie Evenement
+                    html += '</div></div>\n</div>\n<p class="whiteColor">Sélection :</p>\n<div id="liste_evenements" class="d-flex justify-content-around flex-wrap"></div>\n</div>'; //fin du contenu de l'accordéon, mise en place du anchor liste_evenements; fin de la partie Evenement
                     $("#anchorValidation").html(html);
+                    loadTooltipValidation();
                 }
 
                 function validateTweet(button) {
@@ -147,12 +154,26 @@
                                 break;
                         }
                         if (but_status === "valid") {
-
                             $.post('{{ path('validation_validate_tweet') }}', {"status": but_status, "tweet": loadedTweet, "lieux": lieux, "events": events}, function (data) {
                                 lieux = [];
                                 events = [];
                                 if (data.reussite) {
                                     loadTweet();
+                                } else {
+                                    switch (data.error) {
+                                        case "no_candidates":
+                                            alert("Veuillez choisir au moins un lieu");
+                                            break;
+                                        case "no_events":
+                                            alert("Veuillez choisir au moins un évènement");
+                                            break;
+                                        case "no_candidates_and_events":
+                                            alert("Veuillez choisir au moins un lieu et un évènement");
+                                            break;
+                                        case "not_validator":
+                                            location.reload();
+                                            break;
+                                    }
                                 }
                             }, "json");
                         } else {
@@ -161,6 +182,10 @@
                                 events = [];
                                 if (data.reussite) {
                                     loadTweet();
+                                } else {
+                                    if (data.error === "not_validator") {
+                                        location.reload();
+                                    }
                                 }
                             }, "json");
                         }

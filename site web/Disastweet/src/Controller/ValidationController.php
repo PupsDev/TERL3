@@ -94,10 +94,13 @@ class ValidationController extends AbstractController {
         if ($status == "valid") {
             $lieux = $request->request->get('lieux');
             $events = $request->request->get('events');
-            if (sizeof($lieux) <= 0) {
+            if( ($events == null && $events == null) || (sizeof($lieux) <= 0 && sizeof($events) <= 0)){
+                return $this->json(['reussite' => false, 'error' => 'no_candidates_and_events']);
+            }
+            if ($events == null || sizeof($lieux) <= 0) {
                 return $this->json(['reussite' => false, 'error' => 'no_candidates']);
             }
-            if (sizeof($events) <= 0) {
+            if ( $events == null ||  sizeof($events) <= 0) {
                 return $this->json(['reussite' => false, 'error' => 'no_events']);
             }
             $tweet->setValid("true");

@@ -173,9 +173,11 @@ input:checked + .slider {
 input:checked + .slider:before {
     transform: translateX(26px);
 }
+#dialogExtraction{
+    width: 10em;
+}
 
 /* FUNCTION PERSO */
-
 .w80{
     width: 80%;
 }
@@ -220,7 +222,6 @@ input:checked + .slider:before {
 .tweetTextStyle{
     color: white;
     font-style: italic;
-    font-family: cocogoose;
     font-size: 20px;
     text-align: center;
 }

@@ -10,7 +10,7 @@
                 {% if app.user.keywords | length > 0 %}
                     {% for key in app.user.keywords %}
                         <div id="div_cb_{{key}}" class="d-flex align-items-center m-2">
-                            <label class="switch">
+                            <label class="switch tooltipAnchor" title="Activer/Désactiver le mot-clé">
                                 <input class="cb_map" type="checkbox" id="cb_{{key}}" name="key_{{ key }}" value="{{ key }}" checked>
                                 <span class="slider"></span>
                             </label>
@@ -20,12 +20,12 @@
                 {% else %}
                     <p class="center">Aucun Mot-Clé</p>
                     {% if aio is defined%}
-                        <input type="button" value="En Ajouter" onclick="gotoKeyword()" class="btn btn-secondary w-100">
+                        <input type="button" value="En Ajouter" onclick="gotoKeyword()" class="btn btn-secondary w-100 tooltipAnchor" title="">
                     {% endif %}
                 {% endif %}
 
             </div>
-            <button id="map_btn_apply" type="button" class="but_map btn btn-primary" onclick="appliquerFiltre()" {{ (app.user.keywords | length <= 0) ? 'style="display : none"': ''}}>Appliquer</button>
+            <button id="map_btn_apply" type="button" class="but_map btn btn-primary tooltipAnchor" onclick="appliquerFiltre()" {{ (app.user.keywords | length <= 0) ? 'style="display : none"': ''}} title="Appliquer les éléments sélectionnés">Appliquer</button>
         </div>
     </div>
     <div class="accordeon_zone_tweets">

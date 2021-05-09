@@ -29,11 +29,11 @@ class UserSymfonyController extends AbstractController {
     public function meAllInOne(Security $security, UserSymfonyRepository $userRepository, TweetRepository $tweetRepository): Response {
         $this->denyAccessUnlessGranted('ROLE_USER');
         $keywords = [];
-        
+        $python_url = "";
         //Read keywords 
-        $fichier = fopen($this->getParameter("location.python") . "keyWord.txt", "r") or null;
-        if($fichier != null){
-            while(!feof($fichier)){
+        $fichier = fopen("keyWord.txt", "r") or null;
+        if ($fichier != null) {
+            while (!feof($fichier)) {
                 array_push($keywords, strtolower(trim(fgets($fichier))));
             }
             fclose($fichier);
@@ -47,12 +47,14 @@ class UserSymfonyController extends AbstractController {
                         'autoload' => false,
                         'aio' => true,
                         'keywords' => $keywords,
+                        'python_url' => $python_url,
             ]);
         }
         return $this->render('user_symfony/me_aio.html.twig', [
                     'autoload' => false,
                     'aio' => true,
                     'keywords' => $keywords,
+                    'python_url' => $python_url,
         ]);
     }
 
@@ -118,30 +120,57 @@ class UserSymfonyController extends AbstractController {
         return $this->json(['reussite' => true, 'keyword' => $keyword]);
     }
 
+    public function userExtractInfo(Security $security, Request $request) {
+        if ($security->getUser() == null) {
+            return $this->json(['reussite' => false, 'error' => 'Non Connecté']);
+        }
+        $tweeterKey = $security->getUser()->getClefTwitter();
+        $keywords = $security->getUser()->getKeywords();
+        $url = $this->getParameter("python.server");
+        if ($tweeterKey == null || $tweeterKey == "") {
+            return $this->json(['reussite' => false, 'error' => 'Aucune Clé Twitter']);
+        }
+        if (sizeof($keywords) <= 0) {
+            return $this->json(['reussite' => false, 'error' => 'Aucun Mot Clés']);
+        }
+    }
+
     /**
      * @Route("/me/extract_tweets", name="user_extract_tweets", methods={"POST"})
      */
     public function extractTweet(Security $security, Request $request) {
         if ($security->getUser() == null) {
-            return $this->json(['reussite' => false, 'error' => 'not connected']);
+            return $this->json(['reussite' => false, 'error' => 'Non Connecté']);
         }
         $tweeterKey = $security->getUser()->getClefTwitter();
         $keywords = $security->getUser()->getKeywords();
         if ($tweeterKey == null || $tweeterKey == "") {
-            return $this->json(['reussite' => false, 'error' => 'no tweeter key']);
+            return $this->json(['reussite' => false, 'error' => 'Aucune Clé Twitter']);
         }
         if (sizeof($keywords) <= 0) {
-            return $this->json(['reussite' => false, 'error' => 'no keyword']);
+            return $this->json(['reussite' => false, 'error' => 'Aucun Mot Clés']);
         }
-        $db = $this->getParameter("mongodb.sslaccess");
-        $exe = $this->getParameter("location.python");
-        //$command = "python3 " . $exe . "backend.py '$db' '$tweeterKey' '1' '" . escapeshellcmd(implode("", $keywords)) . "'";
-        $command = "python3 " . $exe . "backend.py '$db' '$tweeterKey' '1' '" . $keywords[0] . "'";
-        //$output = shell_exec($command);
-        $output = shell_exec($command . ' 2>&1'); //Pour le DEBUG
-        //$process = new \Symfony\Component\Process\Process(['python3', $exe . "backend.py", $db ,$tweeterKey, 1, $keywords[0]]);
+        $url = $this->getParameter("python.server");
+        $donnees = [
+            'db_url' => $this->getParameter("mongodb.sslaccess"),
+            "bearer_token" => $tweeterKey,
+            "max_pages" => 1,
+            "keyword" => implode(" OR ", $keywords),
+        ];
+        $options = array(
+            'http' => array(
+                'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method' => 'POST',
+                'content' => json_encode($donnees),
+                'timeout' => 200,
+            )
+        );
 
-        return $this->json(['reussite' => true, 'command' => $command, 'output' => $output]);
+        $context = stream_context_create($options);
+        $result = file_get_contents($url, false, $context);
+        return $this->json(['reussite' => true, 'result' => $result]);
+
+        return $this->json($result);
     }
 
     /**

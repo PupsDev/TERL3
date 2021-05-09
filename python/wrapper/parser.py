@@ -38,7 +38,7 @@ class Parser(object):
 			Takes a tweet as Json dict and return the parsed tweet as json
 		"""
 
-		f = open("keyWord.txt", "r")
+		f = open(os.path.join(os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__))),"keyWord.txt"), "r")
 		tag_remove = "[Fake tweet for training data]"
 		ndlists =  [nd.lower().replace('\n', '') for nd in f]
 

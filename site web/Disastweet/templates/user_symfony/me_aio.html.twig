@@ -50,7 +50,7 @@
                                     <option value="{{ keyword }}">{{ keyword }}</option>
                                 {% endfor %}
                             </select>
-                            <a href="javascript:void(0)" onclick="addKeyword()" class="icon_add" ></a>
+                            <a href="javascript:void(0)" onclick="addKeyword()" class="icon_add tooltipAnchor" title="Ajouter le mot-clé"></a>
                         </div>
                     </div>
                     <h5 class="text-center whiteColor">Liste des Mots-Clés</h5>
@@ -60,7 +60,7 @@
                                 {% for key in app.user.keywords %}
                                     <li id="key_{{key}}">
                                         <label class="align-middle m-auto whiteColor">{{ key }}</label>
-                                        <a href="javascript:void(0);" onclick="removeKeyword('{{key}}')" class="icon_trash"></a>
+                                        <a href="javascript:void(0);" onclick="removeKeyword('{{key}}')" class="icon_trash tooltipAnchor" title="Supprimer le mot-clé"></a>
                                     </li>
                                 {% endfor %}
                             {% else %}
@@ -75,11 +75,11 @@
                     <div class="center mb-1em ">
                         <div class="tab_add_keyword w-50">
                             <input type="text" id="tweeter_key" name="twitter_key" value="{{ app.user.getClefTwitter() }}">
-                            <button type="button" onclick="updateTwitterKey()" class="btn btn-secondary" >Mettre à jour</button>
+                            <button type="button" onclick="updateTwitterKey()" class="btn btn-secondary tooltipAnchor" title="Permet de modifier sa clé twitter pour l'extraction de Tweets">Mettre à jour</button>
                         </div>
                     </div>
                     <div class="center">
-                        <button id="extraction_tweet" type="button" onclick="extraireTweets()" class="mlr-8px btn btn-primary w-25">Extraire Tweets</button>
+                        <button id="extraction_tweet" type="button" onclick="extraireTweets()" class="mlr-8px btn btn-primary w-25 tooltipAnchor" title="Attention : Ce processus peut durer plusieurs minutes et ne peux pas être annulé.">Extraire Tweets</button>
                     </div>
                 </div>
                 {% if is_granted('ROLE_ADMIN') %}
@@ -94,7 +94,7 @@
 
         </div>
         <div id="dialogExtraction" title="Extraction de tweets" style="display : none;">
-            <div id='extraction-progress-label' class="progress-label text-center">Extraction en cours...</div>
+            <div id='extraction-progress-label' class="progress-label text-center">Extraction en cours... <div>(Cette opération peut durer plusieurs minutes)</div></div>
             <div id="extraction-progressbar" class="w100"></div>
         </div>
     {% endif %}
@@ -105,12 +105,12 @@
         var extractionEnCours = false;
         $(function () {
             $(".tabs").tabs({activate: function (event, ui) {
-                    if($(event.currentTarget).attr('href') === "#tabs-carte"){
+                    if ($(event.currentTarget).attr('href') === "#tabs-carte") {
                         reloadMap();
                     }
                 }
             });
-
+            $(".tooltipAnchor").tooltip();
             $("#dialogExtraction").dialog({
                 autoOpen: false,
                 closeOnEscape: true,
@@ -139,7 +139,7 @@
             $("#dialogExtraction").dialog("open");
             if (!extractionEnCours) {
                 extractionEnCours = true;
-                $('#extraction_tweet').html("Extraction des tweets...");
+                $('#extraction_tweet').html("Extraction de Tweets...");
                 $.post('{{ path('user_extract_tweets') }}', {}, function (data) {
                     console.log(data);
                     if (data.reussite) {
@@ -166,7 +166,7 @@
 
             }
         }
-
+ 
         //keyword
         function addKeyword() {
             let value = $('#keyword-select').val()
@@ -176,7 +176,7 @@
                     $.post('{{ path('user_add_key') }}', {'keyword': value}, function (data) {
                         if (data.reussite) {
                             let toadd = '<li id="key_' + data.keyword + '">' + '<label class="align-middle m-auto whiteColor">' + data.keyword + '</label>\n\
-                            <a href="javascript:void(0);" class="icon_trash" onclick="removeKeyword(`' + data.keyword + '`)"></a></li>';
+                            <a href="javascript:void(0);" class="icon_trash tooltipAnchor" onclick="removeKeyword(`' + data.keyword + '`)" title="Supprime le mot-clé"></a></li>';
 
                             if ($('#tab_keywords').hasClass('empty')) {
                                 $('#tab_keywords').empty().append(toadd);
